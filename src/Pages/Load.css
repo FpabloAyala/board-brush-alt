@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap');
+
+
+html, body{
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+div{
+    border-bottom: 2px;
+}
+
+span{
+    font-family: "Titillium Web", sans-serif;
+}
+
+.wrapper{
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.load-header{
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-style: solid;
+    border-color: black;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    box-sizing: border-box;
+    height: 7%;
+    width: 100%;
+}
+
+.load-load-icon{
+    height: 100%;
+    width: auto;
+}
+
+.load-header-text{
+    margin-left: 15px;
+    font-size: 40px;
+}
+.load-header-name{
+    position: absolute;
+    right: 15px;
+    font-size: 40px;
+}
+
+.load-recent{
+    border-style: solid;
+    border-color: black;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    height: 43%;
+    width: 100%;
+}
+
+.load-recent-header{
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 65px;
+    width: 100%;
+}
+
+.load-recent-text{
+    font-size: 40px;
+    margin-left: 10px;
+}
+
+.load-recent-button{
+    display: flex;
+    align-items: center;
+    position: absolute;
+    background-color: white;
+    border-style: solid;
+    border-color: black;
+    border-radius: 15px;
+    height: 40px;
+    width: 161px;
+    right: 15px;
+}
+
+.load-new-text{
+    font-size: 24px;
+    margin-right: 5px;
+}
+
+.load-plus-icon{
+    height: 32px;
+    width: 32px;
+}
+
+.load-folders{
+    border-style: solid;
+    border-color: black;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    height: 43%;
+    width: 100%;
+}
+
+.load-folder-header{
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 65px;
+    width: 100%;
+}
+
+.load-footer{
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 7%;
+    width: 100%;
+}
+
+.load-exit-button{
+    position: absolute;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    border-style: none;
+    background-color: white;
+}
+
+.load-exit-button:hover{
+    border-style: solid;
+    border-color: black;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+}
+
+.load-exit-text{
+    font-size: 32px;
+    margin-right: 5px;
+}
+
+.load-exit-icon{
+    height: 32px;
+    width: 32px;
+}
