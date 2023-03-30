@@ -1,13 +1,74 @@
 import { useNavigate } from "react-router-dom";
 import './Editor.css'
-const Editor = () => {
-    const navigate = useNavigate()
-    return (
+import react, { Component } from "react";
+
+
+class Editor extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            buttonList:["Tiles", "Tokens"],
+            activeTab: "Tiles"
+        };
+    }
+
+    onLoadButton = () => {
+        const navigate = useNavigate()
+        navigate('/load')
+    }
+
+    makeTab = (item) =>{
+        const normal = "editor-tab-" + item.toString().toLowerCase();
+        const active = "editor-tab-" + item.toString().toLowerCase() + "-active";
+        if(this.state.activeTab === item){
+            return <button className={active} id={item}>{item}</button>
+        }
+        else{
+            return <button className={normal} id={item} onClick={this.onTabClick}>{item}</button>
+        }
+    }
+
+    onTabClick = event => {
+        this.setState({activeTab: event.target.id})
+    }
+
+    fillTabs = () => {
+        if(this.state.activeTab === "Tiles"){
+            return(
+                <>
+                <button className="editor-tile-red"></button>
+                <button className="editor-tile-green"></button>
+                <button className="editor-tile-blue"></button>
+                <button className="editor-tile-yellow"></button>
+                <button className="editor-tile-upload">+</button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../icons/undo-icon.png")} alt="undo icon"/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../icons/redo-icon.png")} alt="redo icon"/></button>
+                </>
+            )
+        }
+        else{
+            return(
+                <>
+                <button className="editor-token-1">1</button>
+                <button className="editor-token-2">2</button>
+                <button className="editor-token-3">3</button>
+                <button className="editor-token-upload">+</button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../icons/undo-icon.png")} alt="undo icon"/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../icons/redo-icon.png")} alt="redo icon"/></button>
+                </>
+            )
+        }
+    }
+
+    render(){
+        
+        
+        return (
         <>
         <div className="editor-container">
             <div className="editor-tool-bar">
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../icons/save-icon.png")} alt="save icon"/></button>
-                <button className="editor-icon-button" onClick={() => navigate('/load')}><img className="editor-tool-icon" src={require("../icons/load-icon.png")} alt="load icon"/></button>
+                <button className="editor-icon-button" onClick={this.onLoadButton}><img className="editor-tool-icon" src={require("../icons/load-icon.png")} alt="load icon"/></button>
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../icons/hand-icon.png")} alt="grab icon"/></button>
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../icons/paint icon.png")} alt="paint brush icon"/></button>
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../icons/fill-bucket-icon.png")} alt="bucket icon"/></button>
@@ -32,11 +93,23 @@ const Editor = () => {
                     <span className="editor-code">1234</span>
                     <img className="editor-copy-code" src={require("../icons/copy-icon.png")} alt="copy icon"/>
                 </div>
+                <div className="editor-board-frame">
+                    <div className="editor-tabs">
+                        {this.state.buttonList.map(item => (
+                            this.makeTab(item)
+                        ))}
+                    </div>
+                </div>
+                <div className="editor-tab-content">
+                            {this.fillTabs()}
+                </div>
             </div>
         </div>
         
         </>
     );
+    }
+    
 }
 
 export default Editor;
