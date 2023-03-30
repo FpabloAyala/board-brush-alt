@@ -90,7 +90,7 @@ button{
     border-color: black;
     border-radius: 15px;
     height: 40px;
-    width: 165px;
+    width: auto;
     right: 15px;
 }
 
