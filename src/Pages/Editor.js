@@ -20,7 +20,7 @@ class Editor extends Component {
     }
 
     onLoadButton = () => {
-        this.props.navigate('/load')
+        this.props.navigate('/board-brush/load')
     }
 
     makeTab = (item) =>{

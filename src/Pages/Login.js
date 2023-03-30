@@ -19,7 +19,7 @@ class Login extends Component{
     }
 
     onExitButton = () => {
-        this.props.navigate('/editor');
+        this.props.navigate('/board-brush/editor');
     }
 
     toggleHost = () => {

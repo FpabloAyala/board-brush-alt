@@ -16,7 +16,7 @@ class Load extends Component{
     }
 
     onExitButton = () => {
-        this.props.navigate('/')
+        this.props.navigate('/board-brush')
     }
 
     render(){

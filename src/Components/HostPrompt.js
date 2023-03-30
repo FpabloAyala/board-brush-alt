@@ -12,7 +12,7 @@ const HostPrompt = props => {
                 <span className="popup-title-text">Enter Host Credentials</span>
                 <input className="popup-username-input" placeholder="Username"></input>
                 <input className="popup-password-input" placeholder="Password" type={"password"}></input>
-                <button className="popup-login-button" onClick={() => navigate('/editor')}>Login</button>
+                <button className="popup-login-button" onClick={() => navigate('/board-brush/editor')}>Login</button>
             </div>
         </div>
         </>

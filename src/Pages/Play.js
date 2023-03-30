@@ -26,7 +26,7 @@ class Play extends Component {
     }
 
     onLoadButton = () => {
-        this.props.navigate('/load')
+        this.props.navigate('/board-brush/load')
     }
 
     makeTab = (item) =>{
@@ -89,7 +89,7 @@ class Play extends Component {
     }
 
     onExitButton = () => {
-        this.props.navigate('/')
+        this.props.navigate('/board-brush')
     }
 
     render(){

@@ -12,11 +12,11 @@ function App() {
       <>
         <BrowserRouter>
           <Routes>
-            <Route exact path='/board-brush' element={<Navigate to='/'/>}/>
-            <Route path='/' element={<Login/>}/>
-            <Route path='/editor' element={<Editor/>}/>
-            <Route path='/load' element={<Load/>}/>
-            <Route path='/play' element={<Play/>}/>
+            <Route exact path='/board-brush' element={<Login/>}/>
+            {/* <Route path='/' element={<Login/>}/> */}
+            <Route path='/board-brush/editor' element={<Editor/>}/>
+            <Route path='/board-brush/load' element={<Load/>}/>
+            <Route path='/board-brush/play' element={<Play/>}/>
           </Routes>
         </BrowserRouter>
       </>
