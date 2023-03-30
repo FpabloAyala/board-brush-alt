@@ -1,5 +1,11 @@
 import react, { Component } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Load.css"
+
+function LoadWithNav(props){
+    let navigate = useNavigate();
+    return <Load {...props} navigate={navigate}/>
+}
 
 class Load extends Component{
     constructor(props){
@@ -9,8 +15,11 @@ class Load extends Component{
         };
     }
 
+    onExitButton = () => {
+        this.props.navigate('/')
+    }
+
     render(){
-        
         
         return (
         <>
@@ -39,7 +48,7 @@ class Load extends Component{
                 </div>
             </div>
             <div className="load-footer">
-                <button className="load-exit-button">
+                <button className="load-exit-button" onClick={this.onExitButton}>
                     <span className="load-exit-text">Exit</span>
                     <img className="load-exit-icon" src={require("../icons/exit-icon.png")} alt="exit icon"></img>
                 </button>
@@ -51,4 +60,4 @@ class Load extends Component{
     }
 }
 
-export default Load;
+export default LoadWithNav;

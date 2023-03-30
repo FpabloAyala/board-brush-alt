@@ -15,6 +15,10 @@ span{
     font-family: "Titillium Web", sans-serif;
 }
 
+button{
+    font-family: "Titillium Web", sans-serif;
+}
+
 .wrapper{
     position: absolute;
     left: 0px;
