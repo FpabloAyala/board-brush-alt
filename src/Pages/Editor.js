@@ -3,18 +3,24 @@ import './Editor.css'
 import react, { Component } from "react";
 
 
+function WithNav(props){
+    let navigate = useNavigate();
+    return <Editor {...props} navigate={navigate}/>
+}
+
 class Editor extends Component {
     constructor(props){
         super(props);
         this.state = {
             buttonList:["Tiles", "Tokens"],
-            activeTab: "Tiles"
+            activeTab: "Tiles",
+            gridRows: 5,
+            gridCols:9
         };
     }
 
     onLoadButton = () => {
-        const navigate = useNavigate()
-        navigate('/load')
+        this.props.navigate('/load')
     }
 
     makeTab = (item) =>{
@@ -60,6 +66,16 @@ class Editor extends Component {
         }
     }
 
+    fillBoard = () => {
+        var spaces = [];
+        for(let i = 0; i < this.state.gridRows; i++){
+            for(let j = 0; j < this.state.gridCols; j++){
+                spaces.push(<div className="editor-board-space"></div>)
+            }
+        }
+        return spaces;
+    }
+
     render(){
         
         
@@ -94,6 +110,7 @@ class Editor extends Component {
                     <img className="editor-copy-code" src={require("../icons/copy-icon.png")} alt="copy icon"/>
                 </div>
                 <div className="editor-board-frame">
+                    {this.fillBoard()}
                     <div className="editor-tabs">
                         {this.state.buttonList.map(item => (
                             this.makeTab(item)
@@ -112,4 +129,4 @@ class Editor extends Component {
     
 }
 
-export default Editor;
+export default WithNav;

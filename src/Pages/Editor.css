@@ -8,6 +8,7 @@ html, body{
 
 button{
     font-family: "Titillium Web", sans-serif;
+    cursor: pointer;
 }
 
 .editor-container{
@@ -42,6 +43,11 @@ button{
     margin-bottom: 15px;
     margin-left: 11px;
     filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.editor-icon-button:active{
+    position: relative;
+    top: 1px;
 }
 
 .editor-tool-icon{
@@ -140,9 +146,22 @@ button{
 }
 
 .editor-board-frame{
+    display: inline-grid;
     position: relative;
     border: 1px;
     height: 80%;
+    column-gap: 0px;
+    row-gap: 0px;
+    grid-column-start: 1;
+    grid-column-end: 9;
+    grid-template-columns: 11% 11% 11% 11% 11% 11% 11% 11% 11%;
+    grid-row-start: 1;
+    grid-row-end: 5;
+}
+
+.editor-board-space{
+    height: auto;
+    border-style: solid;
 }
 
 .editor-tabs{
