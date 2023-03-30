@@ -5,6 +5,7 @@ import './App.css';
 import Login from './Pages/Login'
 import Editor from './Pages/Editor'
 import Load from './Pages/Load';
+import Play from './Pages/Play';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path='/' element={<Login/>}/>
             <Route path='/editor' element={<Editor/>}/>
             <Route path='/load' element={<Load/>}/>
+            <Route path='/play' element={<Play/>}/>
           </Routes>
         </BrowserRouter>
       </>

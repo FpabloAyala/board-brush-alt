@@ -12,7 +12,7 @@ const JoinPrompt = props => {
                 <span className="popup-title-text">Enter User Credentials</span>
                 <input className="popup-username-input" placeholder="Username"></input>
                 <input className="popup-room-input" placeholder="Room Code"></input>
-                <button className="popup-login-button" onClick={() => navigate('/')}>Login</button>
+                <button className="popup-login-button" onClick={() => navigate('/play')}>Login</button>
             </div>
         </div>
         </>
