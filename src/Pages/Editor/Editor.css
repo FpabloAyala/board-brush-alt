@@ -161,10 +161,12 @@ button{
 
 .editor-board-space{
     height: auto;
-    border-style: solid;
+    border: solid 1px;
 }
 
 .editor-tabs{
+    vertical-align: center;
+    justify-content: center;
     position: absolute;
     bottom: -3px;
     border: 1px;
@@ -174,19 +176,18 @@ button{
     box-sizing: border-box;
 }
 
-.editor-tab-tiles{
+.editor-tab{
     height: 100%;
     width: 163px;
     border-style: solid;
     border-color: black;
     border-left: 0px;
-
     background-color: white;
     font-family: "Titillium Web", sans-serif;
     font-size: 35px;
 }
 
-.editor-tab-tiles-active{
+.editor-tab-active{
     height: 100%;
     width: 163px;
     border-style: solid;
@@ -199,28 +200,21 @@ button{
     font-size: 35px;
 }
 
-.editor-tab-tokens{
-    height: 100%;
-    width: 163px;
-    border-style: solid;
-    border-color: black;
-    border-left: 0px;
-    background-color: white;
-    font-family: "Titillium Web", sans-serif;
-    font-size: 35px;
+.editor-hide-tabs{
+    display: block;
+    position: absolute;
+    right: 25px;
+    bottom: 10px;
+    height: 70%;
+    width: 2%;
+    border: solid 1px;
+    border-radius: 50%;
 }
 
-.editor-tab-tokens-active{
-    height: 100%;
-    width: 163px;
-    border-style: solid;
-    border-color: black;
-    border-left: 0px;
-    border-bottom: 0px;
-    background-color: white;
-    font-family: "Titillium Web", sans-serif;
-    font-weight: bold;
-    font-size: 35px;
+.editor-hide-icon{
+    width: 100%;
+    padding-top: 3px;
+    padding-right: 1px;
 }
 
 .editor-tab-content{

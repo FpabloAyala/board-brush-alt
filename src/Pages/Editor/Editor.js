@@ -20,7 +20,9 @@ class Editor extends Component {
             gridCols:9,
             boardSpaces: null,
             currColor: "#f11a31",
-            spaceKey:0
+            spaceKey:0,
+            isHidden: false,
+            draggedToken: null
         };
     }
 
@@ -29,14 +31,17 @@ class Editor extends Component {
     }
 
     makeTab = (item) =>{
-        const normal = "editor-tab-" + item.toString().toLowerCase();
-        const active = "editor-tab-" + item.toString().toLowerCase() + "-active";
-        if(this.state.activeTab === item){
-            return <button className={active} id={item}>{item}</button>
+        if(!this.state.isHidden){
+            const normal = "editor-tab";
+            const active = "editor-tab-active";
+            if(this.state.activeTab === item){
+                return <button className={active} id={item}>{item}</button>
+            }
+            else{
+                return <button className={normal} id={item} onClick={this.onTabClick}>{item}</button>
+            }  
         }
-        else{
-            return <button className={normal} id={item} onClick={this.onTabClick}>{item}</button>
-        }
+            
     }
 
     onTabClick = event => {
@@ -60,7 +65,8 @@ class Editor extends Component {
         else{
             return(
                 <>
-                <button className="editor-token-1">1</button>
+                <button className="editor-token-1" draggable='true' onDragStart={this.dragStartHandler}
+                onDragEnd={this.dragEndHandler}>1</button>
                 <button className="editor-token-2">2</button>
                 <button className="editor-token-3">3</button>
                 <button className="editor-token-upload">+</button>
@@ -75,9 +81,11 @@ class Editor extends Component {
         if(this.state.boardSpaces === null){
             var spaces = [];
             let key = this.state.spaceKey;
+            const token = null
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>);
+                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)}
+                     spaceDrop={this.handleTokenDrop.bind(this)} token={token}/>);
                     key++;
                 }
             };
@@ -87,20 +95,59 @@ class Editor extends Component {
         
     }
 
-    onSpaceClick(i, j){
+    onSpaceClick(i, j, token){
         const ind = (i*9) + j;
-        // const newSpaces = [...this.state.boardSpaces];
-        // newSpaces[ind] = <Space  color={"#f11a31"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>;
-        // this.setState({boardSpaces: [...newSpaces]});
         this.setState((oldState) => {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
-            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>;
+            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)} spaceDrop={this.handleTokenDrop.bind(this)}
+            token = {token}/>;
             key++;
             return{ boardSpaces: newSpaces,
             spaceKey: key};
         })
     
+    }
+
+    onHide = () =>{
+        const toggle = !this.state.isHidden;
+        this.setState({isHidden: toggle});
+    }
+
+    makeHide(){
+        if(!this.state.isHidden){
+            return <button className='editor-hide-tabs' onClick={this.onHide}><img className="editor-hide-icon" src={require("../../icons/hide-icon.png")} alt="hide icon"/></button>
+        }
+        else{
+            return <button className='editor-hide-tabs' onClick={this.onHide}><img className="editor-hide-icon" src={require("../../icons/show-icon.png")} alt="show icon"/></button>
+        }
+    }
+
+    handleTokenDrop(i, j, token, color){
+        const ind = (i*9) + j;
+        console.log("dropped on " + i + ", " +j);
+        if(token === null){
+            this.setState((oldState) => {
+            let key = this.state.spaceKey;
+            const newSpaces = [...oldState.boardSpaces];
+            newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)} spaceDrop={this.handleTokenDrop.bind(this)}
+            token = {this.state.draggedToken}/>;
+            key++;
+            return{ boardSpaces: newSpaces,
+            spaceKey: key};
+            })
+        }
+        
+    }
+
+    dragStartHandler = (e) =>{
+        const button = e.currentTarget.outerHTML;
+        this.setState({draggedToken: button});
+    }
+
+    dragEndHandler = (e) =>{
+        const button = e.currentTarget.outerHTML;
+        this.setState({draggedToken: null});
     }
 
     render(){
@@ -142,6 +189,7 @@ class Editor extends Component {
                         {this.state.buttonList.map(item => (
                             this.makeTab(item)
                         ))}
+                        {this.makeHide()}
                     </div>
                 </div>
                 <div className="editor-tab-content">
