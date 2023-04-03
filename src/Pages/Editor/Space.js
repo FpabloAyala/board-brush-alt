@@ -10,7 +10,6 @@ class Space extends Component {
     }
 
     handleClick = () => {
-        console.log(this.state.color);
         this.props.spaceClick(this.state.i, this.state.j);
     }
 

@@ -19,7 +19,8 @@ class Editor extends Component {
             gridRows: 5,
             gridCols:9,
             boardSpaces: null,
-            currColor: "#f11a31"
+            currColor: "#f11a31",
+            spaceKey:0
         };
     }
 
@@ -73,27 +74,33 @@ class Editor extends Component {
     fillBoard = () => {
         if(this.state.boardSpaces === null){
             var spaces = [];
+            let key = this.state.spaceKey;
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    spaces.push(<Space color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>);
+                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>);
+                    key++;
                 }
-            }
+            };
+            this.setState({spaceKey: key});
             this.setState({boardSpaces: spaces});
         }
         
     }
 
     onSpaceClick(i, j){
-        console.log("" + i + ", " + j);
-        const list = [];
-        const currColor = this.state.currColor;
-        list[(i*this.state.gridRows) + j] = <Space color={currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>;
-        this.setState({boardSpaces: list});
-        console.log(this.state.boardSpaces);
-    }
-
-    setBoard(){
-        return this.state.boardSpaces;
+        const ind = (i*9) + j;
+        // const newSpaces = [...this.state.boardSpaces];
+        // newSpaces[ind] = <Space  color={"#f11a31"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>;
+        // this.setState({boardSpaces: [...newSpaces]});
+        this.setState((oldState) => {
+            let key = this.state.spaceKey;
+            const newSpaces = [...oldState.boardSpaces];
+            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j)}/>;
+            key++;
+            return{ boardSpaces: newSpaces,
+            spaceKey: key};
+        })
+    
     }
 
     render(){
@@ -130,7 +137,7 @@ class Editor extends Component {
                     <img className="editor-copy-code" src={require("../../icons/copy-icon.png")} alt="copy icon"/>
                 </div>
                 <div className="editor-board-frame">
-                    {this.setBoard()}
+                    {this.state.boardSpaces}
                     <div className="editor-tabs">
                         {this.state.buttonList.map(item => (
                             this.makeTab(item)
