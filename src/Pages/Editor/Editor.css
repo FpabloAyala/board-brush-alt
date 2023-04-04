@@ -219,8 +219,7 @@ button{
 
 .editor-tab-content{
     display: flex;
-    border-style: solid;
-    border-color: black;
+    border: solid 2px black;
     align-items: center;
     border-left: 0px;
     box-sizing: border-box;
@@ -254,6 +253,15 @@ button{
     border-style: solid;
     border-color: black;
     background-color: #141F79;
+    margin-left: 30px;
+}
+
+.color-tab{
+    height: 80px;
+    width: 80px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: black;
     margin-left: 30px;
 }
 

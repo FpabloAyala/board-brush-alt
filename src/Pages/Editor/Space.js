@@ -32,7 +32,9 @@ class Space extends Component {
 
     doToken = () =>{
         if(this.state.token !== null){
-            return this.state.token;
+            return <button className="editor-token-1" draggable='true' onDragStart={this.dragStartHandler}
+            onDragEnd={this.dragEndHandler} value={this.state.token}><img className="pawn-icon" src={require("https://img.icons8.com/windows/512/pawn.png")} alt="pawn icon"/></button>
+            //console.log(this.state.token);
         }
     }
 

@@ -15,6 +15,7 @@ class Editor extends Component {
         super(props);
         this.state = {
             buttonList:["Tiles", "Tokens"],
+            colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
             activeTab: "Tiles",
             gridRows: 5,
             gridCols:9,
@@ -48,15 +49,29 @@ class Editor extends Component {
         this.setState({activeTab: event.target.id})
     }
 
+    onColorClick = e => {
+        this.setState({currColor: e.target.value})
+        console.log(e.target.value);
+    }
+
+    fillColor = (item) => {
+        return <button className="color-tab" value={item} style={{backgroundColor: item}} onClick={this.onColorClick}></button>
+        
+    }
+
     fillTabs = () => {
         if(this.state.activeTab === "Tiles"){
             return(
                 <>
-                <button className="editor-tile-red"></button>
+                {/* <button className="editor-tile-red"></button>
                 <button className="editor-tile-green"></button>
                 <button className="editor-tile-blue"></button>
                 <button className="editor-tile-yellow"></button>
-                <button className="editor-tile-upload">+</button>
+                <button className="editor-tile-upload">+</button> */}
+                {this.state.colorList.map(item => (
+                            this.fillColor(item)
+                        ))}
+                <button className="editor-tile-upload">+</button> 
                 <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
                 </>
@@ -66,7 +81,7 @@ class Editor extends Component {
             return(
                 <>
                 <button className="editor-token-1" draggable='true' onDragStart={this.dragStartHandler}
-                onDragEnd={this.dragEndHandler}>1</button>
+                onDragEnd={this.dragEndHandler} value={"../../icons/pawn-icon.png"}><img className="pawn-icon" src={require("../../icons/pawn-icon.png")} alt="undo icon"/></button>
                 <button className="editor-token-2">2</button>
                 <button className="editor-token-3">3</button>
                 <button className="editor-token-upload">+</button>
@@ -141,7 +156,8 @@ class Editor extends Component {
     }
 
     dragStartHandler = (e) =>{
-        const button = e.currentTarget.outerHTML;
+        const button = e.currentTarget.value;
+        console.log(button);
         this.setState({draggedToken: button});
     }
 
