@@ -160,6 +160,7 @@ button{
 }
 
 .editor-board-space{
+    position: relative;
     height: auto;
     border: solid 1px;
 }
@@ -289,7 +290,7 @@ button{
     margin-left: 30px;
 }
 
-.editor-token-1{
+.editor-token{
     height: 80px;
     width: 80px;
     box-sizing: border-box;
@@ -298,6 +299,23 @@ button{
     background-color: white;
     border-radius: 40px;
     margin-left: 60px;
+    font-size: 48px;
+}
+
+.editor-token-inplay{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    height: 80px;
+    width: 80px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: black;
+    background-color: white;
+    border-radius: 40px;
     font-size: 48px;
 }
 

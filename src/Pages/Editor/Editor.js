@@ -16,6 +16,7 @@ class Editor extends Component {
         this.state = {
             buttonList:["Tiles", "Tokens"],
             colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
+            defaultTokenList: ["/icons/pawn-icon.png", '/icons/bishop-icon.png', '/icons/knight-icon.png', '/icons/rook-icon.png', '/icons/queen-icon.png', '/icons/king-icon.png'],
             activeTab: "Tiles",
             gridRows: 5,
             gridCols:9,
@@ -59,20 +60,21 @@ class Editor extends Component {
         
     }
 
+    fillDefaultToken = (item) =>{
+        console.log(item);
+        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler}
+        onDragEnd={this.dragEndHandler} value={item}><img className="pawn-icon" src={process.env.PUBLIC_URL + item} alt="undo icon"/></button>
+    }
+
     fillTabs = () => {
         if(this.state.activeTab === "Tiles"){
             return(
                 <>
-                {/* <button className="editor-tile-red"></button>
-                <button className="editor-tile-green"></button>
-                <button className="editor-tile-blue"></button>
-                <button className="editor-tile-yellow"></button>
-                <button className="editor-tile-upload">+</button> */}
                 {this.state.colorList.map(item => (
                             this.fillColor(item)
                         ))}
                 <button className="editor-tile-upload">+</button> 
-                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={process.env.PUBLIC_URL + '/icons/undo-icon.png'} alt="undo icon"/></button>
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
                 </>
             )
@@ -80,10 +82,12 @@ class Editor extends Component {
         else{
             return(
                 <>
-                <button className="editor-token-1" draggable='true' onDragStart={this.dragStartHandler}
-                onDragEnd={this.dragEndHandler} value={"../../icons/pawn-icon.png"}><img className="pawn-icon" src={require("../../icons/pawn-icon.png")} alt="undo icon"/></button>
-                <button className="editor-token-2">2</button>
-                <button className="editor-token-3">3</button>
+                {/* 
+                <button className="editor-token">2</button>
+                <button className="editor-token">3</button> */}
+                {this.state.defaultTokenList.map(item => (
+                    this.fillDefaultToken(item)
+                ))}
                 <button className="editor-token-upload">+</button>
                 <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
@@ -162,7 +166,6 @@ class Editor extends Component {
     }
 
     dragEndHandler = (e) =>{
-        const button = e.currentTarget.outerHTML;
         this.setState({draggedToken: null});
     }
 
