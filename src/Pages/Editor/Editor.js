@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import react, { Component } from "react";
 import './Space'
 import Space from './Space';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import { SketchPicker } from 'react-color';
+
+
 
 
 function WithNav(props){
@@ -10,9 +15,15 @@ function WithNav(props){
     return <Editor {...props} navigate={navigate}/>
 }
 
+
+
+
+
 class Editor extends Component {
     constructor(props){
         super(props);
+        
+        //If windows has nothing stored set state to default
         this.state = {
             buttonList:["Tiles", "Tokens"],
             colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
@@ -21,10 +32,86 @@ class Editor extends Component {
             gridCols:9,
             boardSpaces: null,
             currColor: "#f11a31",
+            newColor: "#ffffff",
             spaceKey:0,
             isHidden: false,
-            draggedToken: null
+            draggedToken: null,
         };
+        console.log("STATE", this.state);
+
+        if (window.sessionStorage.getItem('state') !== undefined && window.sessionStorage.getItem('state') !== null){
+            //console.log("STATE in UNDEFINED",window.sessionStorage.getItem('state'));
+            this.state = JSON.parse(window.sessionStorage.getItem('state'));
+            console.log("JSON PARSED STATE: ", JSON.parse(window.sessionStorage.getItem('state')));
+        }
+    }
+
+    setState(state) {
+        let newState = this.state;
+        console.log("NEW STATE: ", newState);
+        newState["boardSpaces"] = null;
+        window.sessionStorage.setItem('state', JSON.stringify(newState));
+        super.setState(state);  
+    }
+
+    //TODO: Add a color picker where on accept -> set curr color and close and on cancel 
+  handleOnColorChange = (color) => {
+    this.setState({ newColor: color.hex });
+    console.log(color);
+  };
+
+  //Add color to list of colors if not already in, once you reach a certain threashold, pop off last used color
+  handleOnAddColorClick = (color) =>{
+    const maxColors = 7;
+    let newColorList = this.state.colorList;
+    console.log("OLD COLOR", this.state.colorList);
+    console.log("ADDED COLOR: ", color);
+    console.log("OLD LIST LEN", newColorList.length);
+    if (!newColorList.includes(color)){
+        newColorList.push(color);
+        if (newColorList.length > maxColors){
+            newColorList.shift(); //Removes the first element of list
+        }
+        this.setState({colorList: newColorList});
+        console.log("NEW COLOR", newColorList);
+    }
+  }
+
+    //TODO: Popup for Color Picker
+PopupGfg() {
+    // console.log("Popping Up Right Now!");
+    return (
+        <div>
+            <Popup trigger=
+                {<button className="editor-tile-upload">+</button>}
+                modal nested>
+                {
+                    close => (
+                        <div className='modal'>
+                            <div className='content'>
+                                Welcome to GFG!!!
+                            </div>
+                            <div>
+                                <SketchPicker
+                                    color={this.state.newColor}
+                                    onChange={this.handleOnColorChange}>
+                                </SketchPicker>
+                                <button onClick=
+                                    {() => this.handleOnAddColorClick(this.state.newColor)}>
+                                        Add Color
+                                </button>
+                            </div>
+                        </div>
+                    )
+                }
+            </Popup>
+        </div>
+    )
+};
+
+    //TODO: OnClick to open up popup for adding new color
+    handleAddColorClick = () => {
+        this.PopupGfg()
     }
 
     onLoadButton = () => {
@@ -70,8 +157,10 @@ class Editor extends Component {
                 <button className="editor-tile-upload">+</button> */}
                 {this.state.colorList.map(item => (
                             this.fillColor(item)
-                        ))}
-                <button className="editor-tile-upload">+</button> 
+                        ))
+                }
+                {this.PopupGfg()}
+                {/* <button className="editor-tile-upload" onClick={this.handleAddColorClick}>+</button>  */}
                 <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
                 </>
@@ -152,7 +241,6 @@ class Editor extends Component {
             spaceKey: key};
             })
         }
-        
     }
 
     dragStartHandler = (e) =>{
@@ -167,8 +255,10 @@ class Editor extends Component {
     }
 
     render(){
+        //TEST
+        console.log("test")
+        console.log(this.state);
         this.fillBoard()
-        
         return (
         <>
         <div className="editor-container">
