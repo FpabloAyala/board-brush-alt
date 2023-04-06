@@ -38,8 +38,8 @@ class Editor extends Component {
             colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
             defaultTokenList: ["/icons/pawn-icon.png", '/icons/bishop-icon.png', '/icons/knight-icon.png', '/icons/rook-icon.png', '/icons/queen-icon.png', '/icons/king-icon.png'],
             activeTab: "Tiles",
-            gridRows: 5,
-            gridCols:9,
+            gridRows: 8,
+            gridCols:8,
             boardSpaces: null,
             currColor: "#f11a31",
             newColor: "#ffffff",
@@ -183,7 +183,7 @@ PopupGfg() {
             //nuclear option
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    const ind = (i*9) + j;
+                    const ind = (i*this.state.gridRows) + j;
                     if(newState[ind].props.token !== null){
                         newState[ind] = <Space key={key} color={newState[ind].props.color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
                         spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
@@ -301,7 +301,7 @@ PopupGfg() {
         }
 
     onSpaceClick(i, j, token){
-        const ind = (i*9) + j;
+        const ind = (i*this.state.gridRows) + j;
         this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
             let key = this.state.spaceKey;
@@ -331,7 +331,7 @@ PopupGfg() {
 
     handleTokenDrop(i, j, token, color){
         console.log("" + i +", " +j)
-        const ind = (i*9) + j;
+        const ind = (i*this.state.gridRows) + j;
         this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
         let key = this.state.spaceKey;
@@ -355,7 +355,7 @@ PopupGfg() {
     }
 
     boardDragEndHandler(i, j, color){
-        const ind = (i*9) + j;
+        const ind = (i*this.state.gridRows) + j;
         this.setState((oldState) => {
         let key = this.state.spaceKey;
         const newSpaces = [...oldState.boardSpaces];
