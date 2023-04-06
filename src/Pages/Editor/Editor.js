@@ -1,6 +1,6 @@
 import './Editor.css'
 import { useNavigate } from "react-router-dom";
-import react, { Component } from "react";
+import react, { Component, useEffect } from "react";
 import './Space'
 import Space from './Space';
 import Popup from 'reactjs-popup';
@@ -15,7 +15,16 @@ function WithNav(props){
     return <Editor {...props} navigate={navigate}/>
 }
 
-
+const Observer = ({ fillBoard, gridCols, gridRows}) => {
+  console.log("Observer being fired");
+  console.log(gridRows);
+  console.log(gridCols);
+  useEffect(() => {
+    fillBoard()
+    console.log("Fill board being fired");
+  }, [gridCols, gridRows])
+  return null // component does not render anything
+}
 
 
 
@@ -38,7 +47,8 @@ class Editor extends Component {
             isHidden: false,
             draggedToken: null,
             undoQueue: [],
-            redoQueue:[]
+            redoQueue:[],
+            settingGrid: false
         };
         //console.log("STATE", this.state);
 
@@ -262,7 +272,8 @@ PopupGfg() {
     }
 
     fillBoard = () => {
-        if(this.state.boardSpaces === null){
+        console.log("FILL BOARD:", this.state.gridRows, this.state.gridCols)
+        if(this.state.boardSpaces === null || this.state.settingGrid){
             var spaces = [];
             let key = this.state.spaceKey;
             //const token = null
@@ -274,9 +285,20 @@ PopupGfg() {
                 }
             };
             this.setState({spaceKey: key});
+            console.log(this.state.boardSpaces);
             this.setState({boardSpaces: spaces});
+            this.setState({settingGrid: false});
         }
     }
+
+    mountHandler = ({ onMount, onUnMount }) => {
+        useEffect(() => {
+            this.fillBoard();
+            onMount()
+            return onUnMount
+        },[this.state.gridCols, this.state.gridCols])
+        return null
+        }
 
     onSpaceClick(i, j, token){
         const ind = (i*9) + j;
@@ -345,11 +367,21 @@ PopupGfg() {
         })
     }
 
+    gridRowHandler = (e) => {
+        this.setState({gridRows: e.target.value});
+        this.setState({settingGrid: true});
+        console.log("grid rows",e.target.value);
+    }
+
+    gridColHandler = (e) => {
+        this.setState({gridCols: e.target.value});
+        this.setState({settingGrid: true});
+        console.log("grid cows",e.target.value);
+    }
+
+    
+
     render(){
-        //TEST
-        //console.log("test")
-        //console.log(this.state);
-        this.fillBoard()
         return (
         <>
         <div className="editor-container">
@@ -372,9 +404,11 @@ PopupGfg() {
                     </div>
 
                     <span className="editor-grid-text">Grid Size:</span>
-                    <input className='editor-size-input'></input>
+                    
+                    <input className='editor-size-input' onChange={this.gridRowHandler} value={this.state.gridRows}></input>
                     <span className="editor-grid-text">X</span>
-                    <input className='editor-size-input'></input>
+                    <input className='editor-size-input' onChange={this.gridColHandler} value={this.state.gridCols}></input>
+                    
 
                     <span className="editor-code-text">Room Code:</span>
                     <span className="editor-code">1234</span>
@@ -382,6 +416,7 @@ PopupGfg() {
                 </div>
                 <div className="editor-board-frame">
                     {this.state.boardSpaces}
+                    <Observer gridRows={this.state.gridRows} gridCols={this.state.gridCols} fillBoard={this.fillBoard}> </Observer>
                     <div className="editor-tabs">
                         {this.state.buttonList.map(item => (
                             this.makeTab(item)
