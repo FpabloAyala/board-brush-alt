@@ -24,8 +24,64 @@ class Editor extends Component {
             currColor: "#f11a31",
             spaceKey:0,
             isHidden: false,
-            draggedToken: null
+            draggedToken: null,
+            undoQueue: [],
+            redoQueue:[]
         };
+    }
+
+    addUndo = (board) =>{
+        if(this.state.undoQueue.length >= 10){
+            const list = [...this.state.undoQueue];
+            list.shift();
+            list.push(board);
+            this.setState({undoQueue: list});
+        }
+        else{
+            console.log("adding to undo");
+            const list = [...this.state.undoQueue];
+            console.log(list.length);
+            list.push(board);
+            console.log(list.length);
+            this.setState({undoQueue: list});
+        }
+        
+    }
+
+    addRedo = (board) =>{
+        if(this.state.undoQueue.length >= 5){
+            const list = [...this.state.redoQueue];
+            list.pop();
+            list.push(board);
+            this.setState({redoQueue: list});
+        }
+        else{
+            const list = [...this.state.redoQueue];
+            list.push(board);
+            this.setState({redoQueue: list});
+        }
+    }
+
+    onRedo = () =>{
+        console.log("redo clicked");
+    }
+
+    onUndo = () =>{
+        if(this.state.undoQueue.length > 0){
+            console.log("undo clicked");
+            const ind = this.state.undoQueue.length - 1;
+            this.addRedo([...this.state.boardSpaces]);
+            const newUndo = [...this.state.undoQueue];
+            console.log(newUndo.length);
+            const newState = newUndo.pop();
+            console.log(newUndo.length);
+            // newUndo.shift();
+            this.setState({boardSpaces: newState, undoQueue: newUndo});
+        }
+        else{
+            console.log("undo empty");
+        }
+        console.log(this.state.boardSpaces[0]);
     }
 
     onLoadButton = () => {
@@ -72,8 +128,8 @@ class Editor extends Component {
                             this.fillColor(item)
                         ))}
                 <button className="editor-tile-upload">+</button> 
-                <button className="editor-tab-undo"><img className="editor-tool-icon" src={process.env.PUBLIC_URL + '/icons/undo-icon.png'} alt="undo icon"/></button>
-                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
                 </>
             )
         }
@@ -87,8 +143,8 @@ class Editor extends Component {
                     this.fillDefaultToken(item)
                 ))}
                 <button className="editor-token-upload">+</button>
-                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
-                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
                 </>
             )
         }
@@ -106,14 +162,20 @@ class Editor extends Component {
                     key++;
                 }
             };
+            //this.addUndo(spaces);
             this.setState({spaceKey: key});
             this.setState({boardSpaces: spaces});
         }
-        
+        else{
+            console.log("rerender state")
+            console.log(this.state)
+        }
     }
 
     onSpaceClick(i, j, token){
         const ind = (i*9) + j;
+        console.log("painted");
+        this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
@@ -141,7 +203,9 @@ class Editor extends Component {
     }
 
     handleTokenDrop(i, j, token, color){
+        console.log("token drop")
         const ind = (i*9) + j;
+        this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
         let key = this.state.spaceKey;
         const newSpaces = [...oldState.boardSpaces];
@@ -155,6 +219,7 @@ class Editor extends Component {
     }
 
     dragStartHandler = (e) =>{
+        console.log("drag start")
         const button = e.currentTarget.value;
         this.setState({draggedToken: button});
     }

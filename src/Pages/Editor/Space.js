@@ -6,15 +6,11 @@ class Space extends Component {
             color: this.props.color,
             i: this.props.space_i,
             j: this.props.space_j,
-            token: this.props.token,
-            stopToken: false
+            token: this.props.token
         };
     }
 
     handleClick = () => {
-        console.log("in space ");
-        const tokenval = this.state.token;
-        console.log(tokenval);
         this.props.spaceClick(this.state.i, this.state.j, this.state.token);
     }
 
@@ -35,20 +31,17 @@ class Space extends Component {
       };
 
     dragStartHandler = (e) => {
-        console.log("board token drag start");
         this.props.tokenDrag(e);
     }
 
     dragEndHandler = (e) => {
-        console.log("board token drag end");
-
-        // this.props.tokenDragEnd(e);
-        this.setState({token: null, stopToken: true});
+        this.props.tokenDragEnd(e);
+        this.setState({token: null});  
     }
 
     doToken = () =>{
+        console.log("token being rerendered");
         if(this.state.token !== null){
-            console.log(this.state.stopToken)
             return <button className="editor-token-inplay" draggable='true' onDragStart={this.dragStartHandler}
             onDragEnd={this.dragEndHandler} value={this.state.token}><img className="token-icon" src={process.env.PUBLIC_URL + this.state.token} alt="pawn icon"/></button>
             //console.log(this.state.token);
