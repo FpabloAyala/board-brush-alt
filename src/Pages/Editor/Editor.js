@@ -47,10 +47,10 @@ class Editor extends Component {
     }
 
     setState(state) {
-        let newState = this.state;
-        console.log("NEW STATE: ", newState);
-        newState["boardSpaces"] = null;
-        window.sessionStorage.setItem('state', JSON.stringify(newState));
+        // let newState = this.state;
+        // console.log("NEW STATE: ", newState);
+        // newState["boardSpaces"] = null;
+        // window.sessionStorage.setItem('state', JSON.stringify(newState));
         super.setState(state);  
     }
 
@@ -201,6 +201,7 @@ PopupGfg() {
 
     onSpaceClick(i, j, token){
         const ind = (i*9) + j;
+        console.log("Old State", this.state.oldState);
         this.setState((oldState) => {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
