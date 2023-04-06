@@ -52,7 +52,6 @@ class Editor extends Component {
 
     onColorClick = e => {
         this.setState({currColor: e.target.value})
-        console.log(e.target.value);
     }
 
     fillColor = (item) => {
@@ -61,7 +60,6 @@ class Editor extends Component {
     }
 
     fillDefaultToken = (item) =>{
-        console.log(item);
         return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler}
         onDragEnd={this.dragEndHandler} value={item}><img className="pawn-icon" src={process.env.PUBLIC_URL + item} alt="undo icon"/></button>
     }
@@ -103,8 +101,8 @@ class Editor extends Component {
             const token = null
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)}
-                     spaceDrop={this.handleTokenDrop.bind(this)} token={token}/>);
+                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
+                     spaceDrop={this.handleTokenDrop.bind(this)} token={null} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.dragEndHandler.bind(this)}/>);
                     key++;
                 }
             };
@@ -119,8 +117,8 @@ class Editor extends Component {
         this.setState((oldState) => {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
-            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)} spaceDrop={this.handleTokenDrop.bind(this)}
-            token = {token}/>;
+            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+            token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.dragEndHandler.bind(this)}/>;
             key++;
             return{ boardSpaces: newSpaces,
             spaceKey: key};
@@ -144,24 +142,20 @@ class Editor extends Component {
 
     handleTokenDrop(i, j, token, color){
         const ind = (i*9) + j;
-        console.log("dropped on " + i + ", " +j);
-        if(token === null){
-            this.setState((oldState) => {
-            let key = this.state.spaceKey;
-            const newSpaces = [...oldState.boardSpaces];
-            newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)} spaceDrop={this.handleTokenDrop.bind(this)}
-            token = {this.state.draggedToken}/>;
-            key++;
-            return{ boardSpaces: newSpaces,
-            spaceKey: key};
-            })
-        }
+        this.setState((oldState) => {
+        let key = this.state.spaceKey;
+        const newSpaces = [...oldState.boardSpaces];
+        newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+        token = {this.state.draggedToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+        key++;
+        return{ boardSpaces: newSpaces,
+        spaceKey: key};
+        })
         
     }
 
     dragStartHandler = (e) =>{
         const button = e.currentTarget.value;
-        console.log(button);
         this.setState({draggedToken: button});
     }
 
