@@ -27,6 +27,7 @@ class Editor extends Component {
         this.state = {
             buttonList:["Tiles", "Tokens"],
             colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
+            defaultTokenList: ["/icons/pawn-icon.png", '/icons/bishop-icon.png', '/icons/knight-icon.png', '/icons/rook-icon.png', '/icons/queen-icon.png', '/icons/king-icon.png'],
             activeTab: "Tiles",
             gridRows: 5,
             gridCols:9,
@@ -36,8 +37,10 @@ class Editor extends Component {
             spaceKey:0,
             isHidden: false,
             draggedToken: null,
+            undoQueue: [],
+            redoQueue:[]
         };
-        console.log("STATE", this.state);
+        //console.log("STATE", this.state);
 
         if (window.sessionStorage.getItem('state') !== undefined && window.sessionStorage.getItem('state') !== null){
             //console.log("STATE in UNDEFINED",window.sessionStorage.getItem('state'));
@@ -47,10 +50,10 @@ class Editor extends Component {
     }
 
     setState(state) {
-        let newState = this.state;
-        console.log("NEW STATE: ", newState);
-        newState["boardSpaces"] = null;
-        window.sessionStorage.setItem('state', JSON.stringify(newState));
+        // let newState = this.state;
+        // console.log("NEW STATE: ", newState);
+        // newState["boardSpaces"] = null;
+        // window.sessionStorage.setItem('state', JSON.stringify(newState));
         super.setState(state);  
     }
 
@@ -64,16 +67,16 @@ class Editor extends Component {
   handleOnAddColorClick = (color) =>{
     const maxColors = 7;
     let newColorList = this.state.colorList;
-    console.log("OLD COLOR", this.state.colorList);
-    console.log("ADDED COLOR: ", color);
-    console.log("OLD LIST LEN", newColorList.length);
+    //console.log("OLD COLOR", this.state.colorList);
+    //console.log("ADDED COLOR: ", color);
+    //console.log("OLD LIST LEN", newColorList.length);
     if (!newColorList.includes(color)){
         newColorList.push(color);
         if (newColorList.length > maxColors){
             newColorList.shift(); //Removes the first element of list
         }
         this.setState({colorList: newColorList});
-        console.log("NEW COLOR", newColorList);
+        //console.log("NEW COLOR", newColorList);
     }
   }
 
@@ -114,6 +117,79 @@ PopupGfg() {
         this.PopupGfg()
     }
 
+    addUndo = (board) =>{
+        if(this.state.undoQueue.length >= 10){
+            const list = [...this.state.undoQueue];
+            list.shift();
+            list.push(board);
+            this.setState({undoQueue: list});
+        }
+        else{
+            const list = [...this.state.undoQueue];
+            list.push(board);
+            this.setState({undoQueue: list});
+        }
+        
+    }
+
+    addRedo = (board) =>{
+        if(this.state.redoQueue.length >= 5){
+            const list = [...this.state.redoQueue];
+            list.shift();
+            list.push(board);
+            this.setState({redoQueue: list});
+        }
+        else{
+            const list = [...this.state.redoQueue];
+            list.push(board);
+            this.setState({redoQueue: list});
+        }
+        //console.log(this.state.redoQueue.length)
+    }
+
+    onRedo = () =>{
+        if(this.state.redoQueue.length > 0){
+            //const ind = this.state.redoQueue.length - 1;
+            this.addUndo([...this.state.boardSpaces]);
+            const newRedo = [...this.state.redoQueue];
+            const newState = newRedo.pop();
+            
+            this.setState({boardSpaces: newState, redoQueue: newRedo});
+        }
+        else{
+            //console.log("redo empty");
+        }
+    }
+
+    onUndo = () =>{
+        if(this.state.undoQueue.length > 0){
+            //const ind = this.state.undoQueue.length - 1;
+            this.addRedo([...this.state.boardSpaces]);
+            const newUndo = [...this.state.undoQueue];
+            const newState = newUndo.pop();
+            
+            let key = this.state.spaceKey;
+
+            //nuclear option
+            for(let i = 0; i < this.state.gridRows; i++){
+                for(let j = 0; j < this.state.gridCols; j++){
+                    const ind = (i*9) + j;
+                    if(newState[ind].props.token !== null){
+                        newState[ind] = <Space key={key} color={newState[ind].props.color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
+                        spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
+                        tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+                        key++;
+                    }
+                }
+            }
+            // newUndo.shift();
+            this.setState({boardSpaces: newState, undoQueue: newUndo, spaceKey: key});
+        }
+        else{
+            //console.log("undo empty");
+        }
+    }
+
     onLoadButton = () => {
         this.props.navigate('/board-brush/load')
     }
@@ -138,12 +214,17 @@ PopupGfg() {
 
     onColorClick = e => {
         this.setState({currColor: e.target.value})
-        console.log(e.target.value);
+        //console.log(e.target.value);
     }
 
     fillColor = (item) => {
         return <button className="color-tab" value={item} style={{backgroundColor: item}} onClick={this.onColorClick}></button>
         
+    }
+
+    fillDefaultToken = (item) =>{
+        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler}
+        onDragEnd={this.dragEndHandler} value={item}><img className="pawn-icon" src={process.env.PUBLIC_URL + item} alt="undo icon"/></button>
     }
 
     fillTabs = () => {
@@ -161,21 +242,20 @@ PopupGfg() {
                 }
                 {this.PopupGfg()}
                 {/* <button className="editor-tile-upload" onClick={this.handleAddColorClick}>+</button>  */}
-                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
-                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
                 </>
             )
         }
         else{
             return(
                 <>
-                <button className="editor-token-1" draggable='true' onDragStart={this.dragStartHandler}
-                onDragEnd={this.dragEndHandler} value={"../../icons/pawn-icon.png"}><img className="pawn-icon" src={require("../../icons/pawn-icon.png")} alt="undo icon"/></button>
-                <button className="editor-token-2">2</button>
-                <button className="editor-token-3">3</button>
+                {this.state.defaultTokenList.map(item => (
+                    this.fillDefaultToken(item)
+                ))}
                 <button className="editor-token-upload">+</button>
-                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon"/></button>
-                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon"/></button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
                 </>
             )
         }
@@ -185,27 +265,27 @@ PopupGfg() {
         if(this.state.boardSpaces === null){
             var spaces = [];
             let key = this.state.spaceKey;
-            const token = null
+            //const token = null
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)}
-                     spaceDrop={this.handleTokenDrop.bind(this)} token={token}/>);
+                    spaces.push(<Space key={key} color={"#ffffff"} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
+                     spaceDrop={this.handleTokenDrop.bind(this)} token={null} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.dragEndHandler.bind(this)}/>);
                     key++;
                 }
             };
             this.setState({spaceKey: key});
             this.setState({boardSpaces: spaces});
         }
-        
     }
 
     onSpaceClick(i, j, token){
         const ind = (i*9) + j;
+        this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
-            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)} spaceDrop={this.handleTokenDrop.bind(this)}
-            token = {token}/>;
+            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+            token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
             key++;
             return{ boardSpaces: newSpaces,
             spaceKey: key};
@@ -228,36 +308,47 @@ PopupGfg() {
     }
 
     handleTokenDrop(i, j, token, color){
+        console.log("" + i +", " +j)
         const ind = (i*9) + j;
-        console.log("dropped on " + i + ", " +j);
-        if(token === null){
-            this.setState((oldState) => {
-            let key = this.state.spaceKey;
-            const newSpaces = [...oldState.boardSpaces];
-            newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this, i, j, token)} spaceDrop={this.handleTokenDrop.bind(this)}
-            token = {this.state.draggedToken}/>;
-            key++;
-            return{ boardSpaces: newSpaces,
-            spaceKey: key};
-            })
-        }
+        this.addUndo(this.state.boardSpaces);
+        this.setState((oldState) => {
+        let key = this.state.spaceKey;
+        const newSpaces = [...oldState.boardSpaces];
+        newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+        token = {this.state.draggedToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+        key++;
+        return{ boardSpaces: newSpaces,
+        spaceKey: key};
+        })
+        
     }
 
     dragStartHandler = (e) =>{
         const button = e.currentTarget.value;
-        console.log(button);
         this.setState({draggedToken: button});
     }
 
     dragEndHandler = (e) =>{
-        const button = e.currentTarget.outerHTML;
         this.setState({draggedToken: null});
+    }
+
+    boardDragEndHandler(i, j, color){
+        const ind = (i*9) + j;
+        this.setState((oldState) => {
+        let key = this.state.spaceKey;
+        const newSpaces = [...oldState.boardSpaces];
+        newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+        token = {null} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+        key++;
+        return{ boardSpaces: newSpaces,
+        spaceKey: key, draggedToken: null};
+        })
     }
 
     render(){
         //TEST
-        console.log("test")
-        console.log(this.state);
+        //console.log("test")
+        //console.log(this.state);
         this.fillBoard()
         return (
         <>

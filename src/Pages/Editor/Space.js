@@ -6,12 +6,13 @@ class Space extends Component {
             color: this.props.color,
             i: this.props.space_i,
             j: this.props.space_j,
-            token: this.props.token
+            token: this.props.token,
+            render:true
         };
     }
 
     handleClick = () => {
-        this.props.spaceClick(this.state.i, this.state.j);
+        this.props.spaceClick(this.state.i, this.state.j, this.state.token);
     }
 
     handleDrop = event => {
@@ -30,11 +31,20 @@ class Space extends Component {
         e.preventDefault();
       };
 
+    dragStartHandler = (e) => {
+        this.props.tokenDrag(e);
+    }
+
+    dragEndHandler = (e) => {
+        this.props.tokenDragEnd(this.state.i, this.state.j, this.state.color);
+        this.setState({render: false});  
+    }
+
     doToken = () =>{
-        if(this.state.token !== null){
-            return <button className="editor-token-1" draggable='true' onDragStart={this.dragStartHandler}
-            onDragEnd={this.dragEndHandler} value={this.state.token}><img className="pawn-icon" src={require("https://img.icons8.com/windows/512/pawn.png")} alt="pawn icon"/></button>
-            //console.log(this.state.token);
+        if(this.state.token !== null && this.state.render){
+            return <button className="editor-token-inplay" draggable='true' onDragStart={this.dragStartHandler}
+            onDragEnd={this.dragEndHandler} value={this.state.token}><img className="token-icon" src={process.env.PUBLIC_URL + this.state.token} alt="pawn icon"/></button>;
+
         }
     }
 
