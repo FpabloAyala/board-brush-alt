@@ -38,20 +38,17 @@ class Editor extends Component {
             this.setState({undoQueue: list});
         }
         else{
-            console.log("adding to undo");
             const list = [...this.state.undoQueue];
-            console.log(list.length);
             list.push(board);
-            console.log(list.length);
             this.setState({undoQueue: list});
         }
         
     }
 
     addRedo = (board) =>{
-        if(this.state.undoQueue.length >= 5){
+        if(this.state.redoQueue.length >= 5){
             const list = [...this.state.redoQueue];
-            list.pop();
+            list.shift();
             list.push(board);
             this.setState({redoQueue: list});
         }
@@ -60,28 +57,49 @@ class Editor extends Component {
             list.push(board);
             this.setState({redoQueue: list});
         }
+        console.log(this.state.redoQueue.length)
     }
 
     onRedo = () =>{
-        console.log("redo clicked");
+        if(this.state.redoQueue.length > 0){
+            const ind = this.state.redoQueue.length - 1;
+            this.addUndo([...this.state.boardSpaces]);
+            const newRedo = [...this.state.redoQueue];
+            const newState = newRedo.pop();
+            
+            this.setState({boardSpaces: newState, redoQueue: newRedo});
+        }
+        else{
+            console.log("redo empty");
+        }
     }
 
     onUndo = () =>{
         if(this.state.undoQueue.length > 0){
-            console.log("undo clicked");
             const ind = this.state.undoQueue.length - 1;
             this.addRedo([...this.state.boardSpaces]);
             const newUndo = [...this.state.undoQueue];
-            console.log(newUndo.length);
             const newState = newUndo.pop();
-            console.log(newUndo.length);
+            
+            let key = this.state.spaceKey;
+
+            for(let i = 0; i < this.state.gridRows; i++){
+                for(let j = 0; j < this.state.gridCols; j++){
+                    const ind = (i*9) + j;
+                    if(newState[ind].props.token !== null){
+                        newState[ind] = <Space key={key} color={newState[ind].props.color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
+                        spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
+                        tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+                        key++;
+                    }
+                }
+            }
             // newUndo.shift();
-            this.setState({boardSpaces: newState, undoQueue: newUndo});
+            this.setState({boardSpaces: newState, undoQueue: newUndo, spaceKey: key});
         }
         else{
             console.log("undo empty");
         }
-        console.log(this.state.boardSpaces[0]);
     }
 
     onLoadButton = () => {
@@ -166,10 +184,6 @@ class Editor extends Component {
             this.setState({spaceKey: key});
             this.setState({boardSpaces: spaces});
         }
-        else{
-            console.log("rerender state")
-            console.log(this.state)
-        }
     }
 
     onSpaceClick(i, j, token){
@@ -180,7 +194,7 @@ class Editor extends Component {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
             newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
-            token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+            token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
             key++;
             return{ boardSpaces: newSpaces,
             spaceKey: key};
@@ -203,14 +217,13 @@ class Editor extends Component {
     }
 
     handleTokenDrop(i, j, token, color){
-        console.log("token drop")
         const ind = (i*9) + j;
         this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
         let key = this.state.spaceKey;
         const newSpaces = [...oldState.boardSpaces];
         newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
-        token = {this.state.draggedToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+        token = {this.state.draggedToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
         key++;
         return{ boardSpaces: newSpaces,
         spaceKey: key};
@@ -219,13 +232,25 @@ class Editor extends Component {
     }
 
     dragStartHandler = (e) =>{
-        console.log("drag start")
         const button = e.currentTarget.value;
         this.setState({draggedToken: button});
     }
 
     dragEndHandler = (e) =>{
         this.setState({draggedToken: null});
+    }
+
+    boardDragEndHandler(i, j, color){
+        const ind = (i*9) + j;
+        this.setState((oldState) => {
+        let key = this.state.spaceKey;
+        const newSpaces = [...oldState.boardSpaces];
+        newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+        token = {null} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+        key++;
+        return{ boardSpaces: newSpaces,
+        spaceKey: key, draggedToken: null};
+        })
     }
 
     render(){
