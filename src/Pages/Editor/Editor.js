@@ -196,6 +196,23 @@ PopupGfg() {
         this.props.navigate('/board-brush/load')
     }
 
+    onStartGame = () => {
+        this.props.navigate('/board-brush/play')
+    }
+
+    makeTabParent = () =>{
+        if(!this.state.isHidden){
+            return (<>
+                <div className="editor-tabs">
+                            {this.state.buttonList.map(item => (
+                                this.makeTab(item)
+                            ))}
+                        </div>
+            </>)
+        }
+        
+    }
+
     makeTab = (item) =>{
         if(!this.state.isHidden){
             const normal = "editor-tab";
@@ -310,7 +327,6 @@ PopupGfg() {
     }
 
     fillBoard = () => {
-        //console.log("FILL BOARD:", this.state.gridRows, this.state.gridCols)
         if(this.state.boardSpaces === null || this.state.settingGrid){
             var spaces = [];
             let key = this.state.spaceKey;
@@ -382,7 +398,6 @@ PopupGfg() {
     }
 
     handleTokenDrop(i, j, token, color, img){
-        //console.log("" + i +", " +j)
         const ind = (i*this.state.gridRows) + j;
         this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
@@ -445,16 +460,14 @@ PopupGfg() {
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/paint icon.png")} alt="paint brush icon"/></button>
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/fill-bucket-icon.png")} alt="bucket icon"/></button>
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/eraser-icon.png")} alt="eraser icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/type-icon.png")} alt="T icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/ruler-icon.png")} alt="ruler icon"/></button>
             </div>
             <div className="editor-right-side">
                 <div className="editor-header-bar">
                     <span className="editor-title">Board Editor</span>
-                    <div className="editor-play-button">
+                    <button className="editor-play-button" onClick={this.onStartGame}>
                         <span className="editor-start-text">Start Game</span>
                         <img className="editor-play-icon" src={require("../../icons/play-icon-green.png")} alt="play button"/>
-                    </div>
+                    </button>
 
                     <span className="editor-grid-text">Grid Size:</span>
                     
@@ -470,12 +483,8 @@ PopupGfg() {
                 <div className="editor-board-frame">
                     {this.state.boardSpaces}
                     <Observer gridRows={this.state.gridRows} gridCols={this.state.gridCols} fillBoard={this.fillBoard}> </Observer>
-                    <div className="editor-tabs">
-                        {this.state.buttonList.map(item => (
-                            this.makeTab(item)
-                        ))}
-                        {this.makeHide()}
-                    </div>
+                    {this.makeTabParent()}
+                    {this.makeHide()}
                 </div>
                 <div className="editor-tab-content">
                             {this.fillTabs()}

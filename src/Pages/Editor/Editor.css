@@ -207,13 +207,14 @@ button{
     position: absolute;
     right: 25px;
     bottom: 10px;
-    height: 70%;
+    height: 4%;
     width: 2%;
     border: solid 1px;
     border-radius: 50%;
 }
 
 .editor-hide-icon{
+    height: auto;
     width: 100%;
     padding-top: 3px;
     padding-right: 1px;

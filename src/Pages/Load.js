@@ -19,6 +19,10 @@ class Load extends Component{
         this.props.navigate('/board-brush')
     }
 
+    onNewBoard = () => {
+        this.props.navigate('/board-brush/editor')
+    }
+
     render(){
         
         return (
@@ -32,7 +36,7 @@ class Load extends Component{
             <div className="load-recent">
                 <div className="load-recent-header">
                     <span className="load-recent-text">Recent Boards</span>
-                    <button className="load-recent-button">
+                    <button className="load-recent-button" onClick={this.onNewBoard}>
                         <span className="load-new-text">New Board</span> 
                         <img className="load-plus-icon" src={require("../icons/plus-icon.png")} alt="new board icon"></img>
                     </button>
