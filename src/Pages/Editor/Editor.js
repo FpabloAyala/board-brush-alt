@@ -482,7 +482,6 @@ PopupGfg() {
     }
 
     gridRowHandler = (e) => {
-        console.log("in grid row handler")
         this.setState({gridRows: e.target.value});
         this.setState({settingGrid: true});
         //console.log("grid rows",e.target.value);
@@ -521,6 +520,20 @@ PopupGfg() {
             </>);
     }
 
+    doFrame = () =>{
+        let frameStyle = {gridTemplateColumns: "repeat("+this.state.gridCols+", 1fr)"};
+        return(
+            <>
+                <div style={frameStyle} className="editor-board-frame">
+                    {this.state.boardSpaces}
+                    <Observer gridRows={this.state.gridRows} gridCols={this.state.gridCols} fillBoard={this.fillBoard}> </Observer>
+                    {this.makeTabParent()}
+                    {this.makeHide()}
+                </div>
+            </>
+        )
+    }
+
     
 
     render(){
@@ -551,12 +564,7 @@ PopupGfg() {
                     <span className="editor-code">1234</span>
                     <img className="editor-copy-code" src={require("../../icons/copy-icon.png")} alt="copy icon"/>
                 </div>
-                <div className="editor-board-frame">
-                    {this.state.boardSpaces}
-                    <Observer gridRows={this.state.gridRows} gridCols={this.state.gridCols} fillBoard={this.fillBoard}> </Observer>
-                    {this.makeTabParent()}
-                    {this.makeHide()}
-                </div>
+                {this.doFrame()}
                 <div className="editor-tab-content">
                             {this.fillTabs()}
                 </div>
