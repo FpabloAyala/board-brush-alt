@@ -174,7 +174,7 @@ button{
     border: 1px;
     box-sizing: border-box;
     height: 54px;
-    width: 100%;
+    width: fit-content;
     box-sizing: border-box;
 }
 

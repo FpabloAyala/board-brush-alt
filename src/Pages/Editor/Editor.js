@@ -175,7 +175,7 @@ PopupGfg() {
             //nuclear option
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    const ind = (i*this.state.gridRows) + j;
+                    const ind = (i*this.state.gridCols) + j;
                     if(newState[ind].props.token !== null){
                         newState[ind] = <Space key={key} color={newState[ind].props.color} backImg={newState[ind].props.backImg} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
                         spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
@@ -345,7 +345,6 @@ PopupGfg() {
                 }
             };
             this.setState({spaceKey: key});
-            //console.log(this.state.boardSpaces);
             this.setState({boardSpaces: spaces});
             this.setState({settingGrid: false});
         }
@@ -363,7 +362,7 @@ PopupGfg() {
 
     onSpaceClick(i, j, token){
         if(this.state.activeTool == 1 || this.state.activeTool == 3){
-            const ind = (i*this.state.gridRows) + j;
+            const ind = (i*this.state.gridCols) + j;
             this.addUndo(this.state.boardSpaces);
             if(!this.state.paintImg){
                 this.setState((oldState) => {
@@ -402,7 +401,7 @@ PopupGfg() {
                 if(!this.state.paintImg){
                     for(let is = startI; is <= endI; is++){
                         for(let js = startJ; js <= endJ; js++){
-                            const ind = (is*this.state.gridRows) + js;
+                            const ind = (is*this.state.gridCols) + js;
                                 newState[ind] = <Space key={key} color={this.state.currColor} space_i={is} space_j={js} spaceClick={this.onSpaceClick.bind(this)}
                                 spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
                                 tokenDragEnd={this.dragEndHandler.bind(this)}/>;
@@ -414,7 +413,7 @@ PopupGfg() {
                 else{
                     for(let is = startI; is <= endI; is++){
                         for(let js = startJ; js <= endJ; js++){
-                            const ind = (is*this.state.gridRows) + js;
+                            const ind = (is*this.state.gridCols) + js;
                                 newState[ind] = <Space key={key} backImg={this.state.currImg} space_i={is} space_j={js} spaceClick={this.onSpaceClick.bind(this)}
                                 spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
                                 tokenDragEnd={this.dragEndHandler.bind(this)}/>;
@@ -445,7 +444,7 @@ PopupGfg() {
     }
 
     handleTokenDrop(i, j, token, color, img){
-        const ind = (i*this.state.gridRows) + j;
+        const ind = (i*this.state.gridCols) + j;
         this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
         let key = this.state.spaceKey;
@@ -470,7 +469,7 @@ PopupGfg() {
     }
 
     boardDragEndHandler(i, j, color, img){
-        const ind = (i*this.state.gridRows) + j;
+        const ind = (i*this.state.gridCols) + j;
         this.setState((oldState) => {
             let key = this.state.spaceKey;
             const newSpaces = [...oldState.boardSpaces];
@@ -483,6 +482,7 @@ PopupGfg() {
     }
 
     gridRowHandler = (e) => {
+        console.log("in grid row handler")
         this.setState({gridRows: e.target.value});
         this.setState({settingGrid: true});
         //console.log("grid rows",e.target.value);
