@@ -45,7 +45,7 @@ class Editor extends Component {
             paintImg: false,
             spaceKey: 0,
             isHidden: false,
-            activeTool: 0,
+            activeTool: 1,
             bucketStart: [],
             draggedToken: null,
             undoQueue: [],
@@ -238,7 +238,7 @@ PopupGfg() {
     }
 
     onColorClick = e => {
-        this.setState({currColor: e.target.value, paintImg: false});
+        this.setState({currColor: e.target.value, paintImg: false, activeTool: 1});
     }
     onCustomClick = e => {
         this.setState({currImg: e.currentTarget.value, paintImg: true});
@@ -494,6 +494,33 @@ PopupGfg() {
         //console.log("grid cows",e.target.value);
     }
 
+    doTools = () => {
+        let grabStyle = {};
+        let brushStyle = {};
+        let bucketStyle = {};
+        let eraserStyle = {};
+        if(this.state.activeTool == 0){
+            grabStyle = {borderColor: "red"};
+        }
+        else if(this.state.activeTool == 1){
+            brushStyle = {borderColor: "red"};
+        }
+        else if(this.state.activeTool == 2){
+            bucketStyle = {borderColor: "red"};
+        }
+        else{
+            eraserStyle = {borderColor: "red"};
+        }
+        
+        return(
+            <>
+                <button className="editor-icon-button" value={0} onClick={this.onToolClick} style={grabStyle}><img className="editor-tool-icon" src={require("../../icons/hand-icon.png")} alt="grab icon"/></button>
+                <button className="editor-icon-button" value={1} onClick={this.onToolClick} style={brushStyle}><img className="editor-tool-icon" src={require("../../icons/paint icon.png")} alt="paint brush icon"/></button>
+                <button className="editor-icon-button" value={2} onClick={this.onToolClick} style={bucketStyle}><img className="editor-tool-icon" src={require("../../icons/fill-bucket-icon.png")} alt="bucket icon"/></button>
+                <button className="editor-icon-button" value={3} onClick={this.onToolClick} style={eraserStyle}><img className="editor-tool-icon" src={require("../../icons/eraser-icon.png")} alt="eraser icon"/></button>
+            </>);
+    }
+
     
 
     render(){
@@ -503,10 +530,7 @@ PopupGfg() {
             <div className="editor-tool-bar">
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/save-icon.png")} alt="save icon"/></button>
                 <button className="editor-icon-button" onClick={this.onLoadButton}><img className="editor-tool-icon" src={require("../../icons/load-icon.png")} alt="load icon"/></button>
-                <button className="editor-icon-button" value={0} onClick={this.onToolClick}><img className="editor-tool-icon" src={require("../../icons/hand-icon.png")} alt="grab icon"/></button>
-                <button className="editor-icon-button" value={1} onClick={this.onToolClick}><img className="editor-tool-icon" src={require("../../icons/paint icon.png")} alt="paint brush icon"/></button>
-                <button className="editor-icon-button" value={2} onClick={this.onToolClick}><img className="editor-tool-icon" src={require("../../icons/fill-bucket-icon.png")} alt="bucket icon"/></button>
-                <button className="editor-icon-button" value={3} onClick={this.onToolClick}><img className="editor-tool-icon" src={require("../../icons/eraser-icon.png")} alt="eraser icon"/></button>
+                {this.doTools()}
             </div>
             <div className="editor-right-side">
                 <div className="editor-header-bar">
