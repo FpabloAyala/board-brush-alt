@@ -5,6 +5,7 @@ import './Space'
 import Space from './Space';
 import UploadButton from './UploadButton';
 import Popup from 'reactjs-popup';
+import HelpPopup from './HelpPopup';
 import 'reactjs-popup/dist/index.css';
 import { SketchPicker } from 'react-color';
 
@@ -50,6 +51,7 @@ class Editor extends Component {
             draggedToken: null,
             undoQueue: [],
             redoQueue:[],
+            showHelp: false,
             settingGrid: false
         };
 
@@ -534,16 +536,27 @@ PopupGfg() {
         )
     }
 
-    
+    toggleHelp = () =>{
+        const toggle = !this.state.showHelp
+        this.setState({showHelp: toggle});
+    }
+
+    doPopup = () =>{
+        if(this.state.showHelp){
+            return <HelpPopup handleClose={this.toggleHelp}></HelpPopup>
+        }
+    }
 
     render(){
         return (
         <>
         <div className="editor-container">
+            {this.doPopup()}
             <div className="editor-tool-bar">
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/save-icon.png")} alt="save icon"/></button>
                 <button className="editor-icon-button" onClick={this.onLoadButton}><img className="editor-tool-icon" src={require("../../icons/load-icon.png")} alt="load icon"/></button>
                 {this.doTools()}
+                <button className="editor-help-button" onClick={this.toggleHelp}><img className="editor-tool-icon" src={require("../../icons/help-icon.png")} alt="help icon"/></button>
             </div>
             <div className="editor-right-side">
                 <div className="editor-header-bar">
