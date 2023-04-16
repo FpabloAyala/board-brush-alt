@@ -45,6 +45,8 @@ class Editor extends Component {
             newColor: "#ffffff",
             currImg: null,
             paintImg: false,
+            //currToken: null, //For token
+            //paintToken: false, //For token
             spaceKey: 0,
             isHidden: false,
             activeTool: 1,
@@ -207,7 +209,7 @@ PopupGfg() {
         this.setState({activeTool: clickedTool});
         console.log(clickedTool)
         if(clickedTool == 3){
-            this.setState({currColor: "#ffffff", paintImg: false});
+            this.setState({currColor: "#ffffff", paintImg: false , /*for token paintToken: false*/});
         }
     }
 
@@ -243,15 +245,15 @@ PopupGfg() {
     }
 
     onColorClick = e => {
-        this.setState({currColor: e.target.value, paintImg: false, activeTool: 1});
+        this.setState({currColor: e.target.value, paintImg: false, activeTool: 1, /*for token paintToken: false*/});
     }
     onCustomClick = e => {
-        this.setState({currImg: e.currentTarget.value, paintImg: true});
+        this.setState({currImg: e.currentTarget.value, paintImg: true, activeTool: 1, /*for token paintToken: false*/});
     }
 
     fillColor = (item) => {
         let style = {backgroundColor: item};
-        if(this.state.currColor === item && !this.state.paintImg){
+        if(this.state.currColor === item && !this.state.paintImg /*for token  && !this.state.paintToken*/){
             style = {
                 borderColor: "red",
                 backgroundColor: item};
@@ -262,7 +264,7 @@ PopupGfg() {
 
     fillImgTiles = (item) =>{
         let style = {};
-        if(this.state.currImg === item && this.state.paintImg){
+        if(this.state.currImg === item && this.state.paintImg /*for token  && !this.state.paintToken*/){
             style = {borderColor: "red"};
         }
         return <button className="color-tab" style={style} value={item} onClick={this.onCustomClick}><img className="editor-tile-img" value={item} src={item} alt="custom image"/></button>;
@@ -284,7 +286,6 @@ PopupGfg() {
     }
 
     tokenImage = (img) =>{
-        console.log("doing token img");
         const imgURL = URL.createObjectURL(img);
         this.setState((oldState) =>{
             const list =[...oldState.customTokens]
@@ -299,14 +300,20 @@ PopupGfg() {
         })
     }
 
+    /*For token 
+    onTokenClick = (e) =>{
+        console.log(e.currentTarget.value);
+        this.setState({currToken: e.currentTarget.value, paintImg: false, activeTool: 1, paintToken: true});
+    }*/
+
     fillDefaultToken = (item) =>{
-        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler}
+        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler} /*for Token  onClick={this.onTokenClick}*/
         onDragEnd={this.dragEndHandler} value={item}><img className="pawn-icon" src={process.env.PUBLIC_URL + item} alt="undo icon"/></button>
     }
 
     fillImgTokens = (item) =>{
         console.log(item);
-        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler}
+        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler} /*for Token  onClick={this.onTokenClick}*/
         onDragEnd={this.dragEndHandler} value={item}><img className="editor-token-img" src={item} alt="custom image"/></button>
     }
 
@@ -389,7 +396,7 @@ PopupGfg() {
         if(this.state.activeTool == 1 || this.state.activeTool == 3){
             const ind = (i*this.state.gridCols) + j;
             this.addUndo(this.state.boardSpaces);
-            if(!this.state.paintImg){
+            if(!this.state.paintImg /*for token  && !this.state.paintToken*/){
                 this.setState((oldState) => {
                     let key = this.state.spaceKey;
                     const newSpaces = [...oldState.boardSpaces];
@@ -400,7 +407,7 @@ PopupGfg() {
                     spaceKey: key};
                 })
             }
-            else{
+            else if(this.state.paintImg){
                 this.setState((oldState) => {
                     let key = this.state.spaceKey;
                     const newSpaces = [...oldState.boardSpaces];
@@ -411,6 +418,18 @@ PopupGfg() {
                     spaceKey: key};
                 })
             }
+            /*for token 
+            else{
+                this.setState((oldState) => {
+                    let key = this.state.spaceKey;
+                    const newSpaces = [...oldState.boardSpaces];
+                    newSpaces[ind] = <Space key={key} color={newSpaces[ind].props.color}  backImg={newSpaces[ind].props.backImg} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+                    token = {this.state.currToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+                    key++;
+                    return{ boardSpaces: newSpaces,
+                    spaceKey: key};
+                })
+            }*/
         }
         else if(this.state.activeTool == 2){
             
