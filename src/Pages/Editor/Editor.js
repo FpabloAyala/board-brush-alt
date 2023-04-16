@@ -8,6 +8,7 @@ import Popup from 'reactjs-popup';
 import HelpPopup from './HelpPopup';
 import 'reactjs-popup/dist/index.css';
 import { SketchPicker } from 'react-color';
+import RulesPopup from './RulesPopup';
 
 
 
@@ -31,7 +32,7 @@ class Editor extends Component {
         super(props);
         //If windows has nothing stored set state to default
         this.state = {
-            buttonList:["Tiles", "Tokens"],
+            buttonList:["Tiles", "Tokens", "Rules"],
             colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
             customTiles:[],
             defaultTokenList: ["/icons/pawn-icon.png", '/icons/bishop-icon.png', '/icons/knight-icon.png', '/icons/rook-icon.png', '/icons/queen-icon.png', '/icons/king-icon.png'],
@@ -52,6 +53,8 @@ class Editor extends Component {
             undoQueue: [],
             redoQueue:[],
             showHelp: false,
+            showRules: false,
+            rulesList: [],
             settingGrid: false
         };
 
@@ -247,12 +250,22 @@ PopupGfg() {
     }
 
     fillColor = (item) => {
-        return <button className="color-tab" value={item} style={{backgroundColor: item}} onClick={this.onColorClick}></button>
+        let style = {backgroundColor: item};
+        if(this.state.currColor === item && !this.state.paintImg){
+            style = {
+                borderColor: "red",
+                backgroundColor: item};
+        }
+        return <button className="color-tab" value={item} style={style} onClick={this.onColorClick}></button>
         
     }
 
     fillImgTiles = (item) =>{
-        return <button className="color-tab" value={item} onClick={this.onCustomClick}><img className="editor-tile-img" value={item} src={item} alt="custom image"/></button>;
+        let style = {};
+        if(this.state.currImg === item && this.state.paintImg){
+            style = {borderColor: "red"};
+        }
+        return <button className="color-tab" style={style} value={item} onClick={this.onCustomClick}><img className="editor-tile-img" value={item} src={item} alt="custom image"/></button>;
     }
 
     tileImage = (img) =>{
@@ -316,7 +329,7 @@ PopupGfg() {
                 </>
             )
         }
-        else{
+        else if(this.state.activeTab === "Tokens"){
             return(
                 <>
                 {this.state.defaultTokenList.map(item => (
@@ -331,6 +344,16 @@ PopupGfg() {
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
                 </>
             )
+        }
+        else{
+            return (
+            <>
+                <button className="editor-token" onClick={this.toggleRules}>
+                    <img className="editor-rules-img" src={require("../../icons/rules-icon.png")} alt="custom image"/>
+                </button>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
+            </>)
         }
     }
 
@@ -541,9 +564,22 @@ PopupGfg() {
         this.setState({showHelp: toggle});
     }
 
+    toggleRules = () =>{
+        const toggle = !this.state.showRules
+        this.setState({showRules: toggle});
+    }
+
+    closeRules = (rules) =>{
+        this.setState({rulesList: rules});
+        this.toggleRules()
+    }
+
     doPopup = () =>{
         if(this.state.showHelp){
             return <HelpPopup handleClose={this.toggleHelp}></HelpPopup>
+        }
+        else if(this.state.showRules){
+            return <RulesPopup handleClose={this.closeRules} rules={this.state.rulesList}></RulesPopup>
         }
     }
 

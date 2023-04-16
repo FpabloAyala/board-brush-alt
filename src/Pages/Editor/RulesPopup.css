@@ -9,16 +9,6 @@ button{
     cursor: pointer;
 }
 
-li{
-    position: relative;
-    display: flex;
-    /* border: 1px solid black; */
-    text-align: center;
-    vertical-align: center;
-    align-items: center;
-    font-size: small;
-}
-
 .popup-container{
     position: absolute;
     left: 0;
@@ -45,6 +35,13 @@ li{
     z-index: 1;
 }
 
+.rules-wrapper{
+    height: 60%;
+    width: 90%;
+    border: 1px solid black;
+    overflow-y:auto
+}
+
 .popup-close-button{
     position: absolute;
     height: 40px;
@@ -59,20 +56,39 @@ li{
 
 .popup-title-text{
     margin-top: 10%;
+    padding: 10px;
     font-size: 40px;
 }
 
-.popup-help-text{
-    margin-top: 2%;
-    margin-left: 10%;
-    font-size: 1vw;
+.popup-rule-text{
+    margin-left: 2rem;
+    display: list-item;
+    list-style-type: disc;
+    font-size: 24px;
 }
 
-.help-icon{
-    position: absolute;
-    left: -10%;
-    width: 8%;
-    height: auto;
+.input-wrapper{
+    margin-top: 5px;
+    width: 90%;
+}
+
+.rules-entry{
+    width: 75%;
+}
+
+.add-button{
+    margin-left: 5px;
+}
+
+.rule-entry-wrapper{
+    display: flex;
+    align-items: center;
+}
+
+.remove-button{
+    height: 50%;
+    background-color: white;
     border: 1px solid black;
+    border-radius: 30%;
+    margin-left: 5px;
 }
-
