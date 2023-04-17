@@ -377,6 +377,7 @@ PopupGfg() {
                 }
             };
             this.setState({spaceKey: key});
+            console.log(this.state.boardSpaces);
             this.setState({boardSpaces: spaces});
             this.setState({settingGrid: false});
         }
@@ -601,6 +602,33 @@ PopupGfg() {
             return <RulesPopup handleClose={this.closeRules} rules={this.state.rulesList}></RulesPopup>
         }
     }
+
+    boardDragEndHandler(i, j, color){
+        const ind = (i*this.state.gridRows) + j;
+        this.setState((oldState) => {
+        let key = this.state.spaceKey;
+        const newSpaces = [...oldState.boardSpaces];
+        newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+        token = {null} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+        key++;
+        return{ boardSpaces: newSpaces,
+        spaceKey: key, draggedToken: null};
+        })
+    }
+
+    gridRowHandler = (e) => {
+        this.setState({gridRows: e.target.value});
+        this.setState({settingGrid: true});
+        console.log("grid rows",e.target.value);
+    }
+
+    gridColHandler = (e) => {
+        this.setState({gridCols: e.target.value});
+        this.setState({settingGrid: true});
+        console.log("grid cows",e.target.value);
+    }
+
+    
 
     render(){
         return (
