@@ -245,10 +245,20 @@ PopupGfg() {
     }
 
     onColorClick = e => {
-        this.setState({currColor: e.target.value, paintImg: false, activeTool: 1, /*for token paintToken: false*/});
+        if(this.state.activeTool == 1){
+            this.setState({currColor: e.target.value, paintImg: false, activeTool: 1, /*for token paintToken: false*/});
+        }
+        else if(this.state.activeTool == 2){
+            this.setState({currColor: e.target.value, paintImg: false, activeTool: 2, /*for token paintToken: false*/});
+        }
     }
     onCustomClick = e => {
-        this.setState({currImg: e.currentTarget.value, paintImg: true, activeTool: 1, /*for token paintToken: false*/});
+        if(this.state.activeTool == 1){
+            this.setState({currImg: e.currentTarget.value, paintImg: true, activeTool: 1, /*for token paintToken: false*/});
+        }
+        else if(this.state.activeTool == 2){
+            this.setState({currImg: e.currentTarget.value, paintImg: true, activeTool: 2, /*for token paintToken: false*/});
+        }
     }
 
     fillColor = (item) => {
