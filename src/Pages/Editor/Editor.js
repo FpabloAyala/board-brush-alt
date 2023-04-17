@@ -1,11 +1,14 @@
 import './Editor.css'
 import { useNavigate } from "react-router-dom";
-import react, { Component } from "react";
+import react, { Component, useEffect, useRef } from "react";
 import './Space'
 import Space from './Space';
+import UploadButton from './UploadButton';
 import Popup from 'reactjs-popup';
+import HelpPopup from './HelpPopup';
 import 'reactjs-popup/dist/index.css';
 import { SketchPicker } from 'react-color';
+import RulesPopup from './RulesPopup';
 
 
 
@@ -15,37 +18,51 @@ function WithNav(props){
     return <Editor {...props} navigate={navigate}/>
 }
 
-
+const Observer = ({ fillBoard, gridCols, gridRows}) => {
+  useEffect(() => {
+    fillBoard()
+  }, [gridCols, gridRows])
+  return null // component does not render anything
+}
 
 
 
 class Editor extends Component {
     constructor(props){
         super(props);
-        
         //If windows has nothing stored set state to default
         this.state = {
-            buttonList:["Tiles", "Tokens"],
+            buttonList:["Tiles", "Tokens", "Rules"],
             colorList: ["#f11a31", "#469E1B", "#141F79", "#FBF033"],
+            customTiles:[],
             defaultTokenList: ["/icons/pawn-icon.png", '/icons/bishop-icon.png', '/icons/knight-icon.png', '/icons/rook-icon.png', '/icons/queen-icon.png', '/icons/king-icon.png'],
+            customTokens:[],
             activeTab: "Tiles",
-            gridRows: 5,
-            gridCols:9,
+            gridRows: 8,
+            gridCols:8,
             boardSpaces: null,
             currColor: "#f11a31",
             newColor: "#ffffff",
-            spaceKey:0,
+            currImg: null,
+            paintImg: false,
+            //currToken: null, //For token
+            //paintToken: false, //For token
+            spaceKey: 0,
             isHidden: false,
+            activeTool: 1,
+            bucketStart: [],
             draggedToken: null,
             undoQueue: [],
-            redoQueue:[]
+            redoQueue:[],
+            showHelp: false,
+            showRules: false,
+            rulesList: [],
+            settingGrid: false
         };
-        //console.log("STATE", this.state);
 
         if (window.sessionStorage.getItem('state') !== undefined && window.sessionStorage.getItem('state') !== null){
-            //console.log("STATE in UNDEFINED",window.sessionStorage.getItem('state'));
             this.state = JSON.parse(window.sessionStorage.getItem('state'));
-            console.log("JSON PARSED STATE: ", JSON.parse(window.sessionStorage.getItem('state')));
+            //console.log("JSON PARSED STATE: ", JSON.parse(window.sessionStorage.getItem('state')));
         }
     }
 
@@ -60,16 +77,13 @@ class Editor extends Component {
     //TODO: Add a color picker where on accept -> set curr color and close and on cancel 
   handleOnColorChange = (color) => {
     this.setState({ newColor: color.hex });
-    console.log(color);
+    //console.log(color);
   };
 
   //Add color to list of colors if not already in, once you reach a certain threashold, pop off last used color
   handleOnAddColorClick = (color) =>{
     const maxColors = 7;
     let newColorList = this.state.colorList;
-    //console.log("OLD COLOR", this.state.colorList);
-    //console.log("ADDED COLOR: ", color);
-    //console.log("OLD LIST LEN", newColorList.length);
     if (!newColorList.includes(color)){
         newColorList.push(color);
         if (newColorList.length > maxColors){
@@ -82,7 +96,6 @@ class Editor extends Component {
 
     //TODO: Popup for Color Picker
 PopupGfg() {
-    // console.log("Popping Up Right Now!");
     return (
         <div>
             <Popup trigger=
@@ -112,7 +125,6 @@ PopupGfg() {
     )
 };
 
-    //TODO: OnClick to open up popup for adding new color
     handleAddColorClick = () => {
         this.PopupGfg()
     }
@@ -156,9 +168,6 @@ PopupGfg() {
             
             this.setState({boardSpaces: newState, redoQueue: newRedo});
         }
-        else{
-            //console.log("redo empty");
-        }
     }
 
     onUndo = () =>{
@@ -173,9 +182,9 @@ PopupGfg() {
             //nuclear option
             for(let i = 0; i < this.state.gridRows; i++){
                 for(let j = 0; j < this.state.gridCols; j++){
-                    const ind = (i*9) + j;
+                    const ind = (i*this.state.gridCols) + j;
                     if(newState[ind].props.token !== null){
-                        newState[ind] = <Space key={key} color={newState[ind].props.color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
+                        newState[ind] = <Space key={key} color={newState[ind].props.color} backImg={newState[ind].props.backImg} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)}
                         spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
                         tokenDragEnd={this.dragEndHandler.bind(this)}/>;
                         key++;
@@ -185,13 +194,36 @@ PopupGfg() {
             // newUndo.shift();
             this.setState({boardSpaces: newState, undoQueue: newUndo, spaceKey: key});
         }
-        else{
-            //console.log("undo empty");
-        }
     }
 
     onLoadButton = () => {
         this.props.navigate('/board-brush/load')
+    }
+
+    onStartGame = () => {
+        this.props.navigate('/board-brush/play')
+    }
+
+    onToolClick = (e) => {
+        const clickedTool = e.currentTarget.value;
+        this.setState({activeTool: clickedTool});
+        console.log(clickedTool)
+        if(clickedTool == 3){
+            this.setState({currColor: "#ffffff", paintImg: false , /*for token paintToken: false*/});
+        }
+    }
+
+    makeTabParent = () =>{
+        if(!this.state.isHidden){
+            return (<>
+                <div className="editor-tabs">
+                            {this.state.buttonList.map(item => (
+                                this.makeTab(item)
+                            ))}
+                        </div>
+            </>)
+        }
+        
     }
 
     makeTab = (item) =>{
@@ -213,56 +245,127 @@ PopupGfg() {
     }
 
     onColorClick = e => {
-        this.setState({currColor: e.target.value})
-        //console.log(e.target.value);
+        this.setState({currColor: e.target.value, paintImg: false, activeTool: 1, /*for token paintToken: false*/});
+    }
+    onCustomClick = e => {
+        this.setState({currImg: e.currentTarget.value, paintImg: true, activeTool: 1, /*for token paintToken: false*/});
     }
 
     fillColor = (item) => {
-        return <button className="color-tab" value={item} style={{backgroundColor: item}} onClick={this.onColorClick}></button>
+        let style = {backgroundColor: item};
+        if(this.state.currColor === item && !this.state.paintImg /*for token  && !this.state.paintToken*/){
+            style = {
+                borderColor: "red",
+                backgroundColor: item};
+        }
+        return <button className="color-tab" value={item} style={style} onClick={this.onColorClick}></button>
         
     }
 
+    fillImgTiles = (item) =>{
+        let style = {};
+        if(this.state.currImg === item && this.state.paintImg /*for token  && !this.state.paintToken*/){
+            style = {borderColor: "red"};
+        }
+        return <button className="color-tab" style={style} value={item} onClick={this.onCustomClick}><img className="editor-tile-img" value={item} src={item} alt="custom image"/></button>;
+    }
+
+    tileImage = (img) =>{
+        const imgURL = URL.createObjectURL(img);
+        this.setState((oldState) =>{
+            const list =[...oldState.customTiles]
+            if(list.length == 4){
+                list.shift();
+                list.push(imgURL);
+            }
+            else{
+                list.push(imgURL);
+            }
+            return {customTiles: list}
+        })
+    }
+
+    tokenImage = (img) =>{
+        const imgURL = URL.createObjectURL(img);
+        this.setState((oldState) =>{
+            const list =[...oldState.customTokens]
+            if(list.length == 4){
+                list.shift();
+                list.push(imgURL);
+            }
+            else{
+                list.push(imgURL);
+            }
+            return {customTokens: list}
+        })
+    }
+
+    /*For token 
+    onTokenClick = (e) =>{
+        console.log(e.currentTarget.value);
+        this.setState({currToken: e.currentTarget.value, paintImg: false, activeTool: 1, paintToken: true});
+    }*/
+
     fillDefaultToken = (item) =>{
-        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler}
+        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler} /*for Token  onClick={this.onTokenClick}*/
         onDragEnd={this.dragEndHandler} value={item}><img className="pawn-icon" src={process.env.PUBLIC_URL + item} alt="undo icon"/></button>
+    }
+
+    fillImgTokens = (item) =>{
+        console.log(item);
+        return <button className="editor-token" draggable='true' onDragStart={this.dragStartHandler} /*for Token  onClick={this.onTokenClick}*/
+        onDragEnd={this.dragEndHandler} value={item}><img className="editor-token-img" src={item} alt="custom image"/></button>
     }
 
     fillTabs = () => {
         if(this.state.activeTab === "Tiles"){
             return(
                 <>
-                {/* <button className="editor-tile-red"></button>
-                <button className="editor-tile-green"></button>
-                <button className="editor-tile-blue"></button>
-                <button className="editor-tile-yellow"></button>
-                <button className="editor-tile-upload">+</button> */}
                 {this.state.colorList.map(item => (
                             this.fillColor(item)
                         ))
                 }
                 {this.PopupGfg()}
-                {/* <button className="editor-tile-upload" onClick={this.handleAddColorClick}>+</button>  */}
+
+                {this.state.customTiles.map(item =>(
+                    this.fillImgTiles(item)
+                ))}
+                <UploadButton name={"editor-tile-upload"} callBack={this.tileImage}></UploadButton>
+                <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
+                <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
+                </>
+            )
+        }
+        else if(this.state.activeTab === "Tokens"){
+            return(
+                <>
+                {this.state.defaultTokenList.map(item => (
+                    this.fillDefaultToken(item)
+                ))}
+                
+                {this.state.customTokens.map(item =>(
+                    this.fillImgTokens(item)
+                ))}
+                <UploadButton name={"editor-token-upload"} callBack={this.tokenImage}></UploadButton>
                 <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
                 </>
             )
         }
         else{
-            return(
-                <>
-                {this.state.defaultTokenList.map(item => (
-                    this.fillDefaultToken(item)
-                ))}
-                <button className="editor-token-upload">+</button>
+            return (
+            <>
+                <button className="editor-token" onClick={this.toggleRules}>
+                    <img className="editor-rules-img" src={require("../../icons/rules-icon.png")} alt="custom image"/>
+                </button>
                 <button className="editor-tab-undo"><img className="editor-tool-icon" src={require("../../icons/undo-icon.png")} alt="undo icon" onClick={this.onUndo}/></button>
                 <button className="editor-tab-redo"><img className="editor-tool-icon" src={require("../../icons/redo-icon.png")} alt="redo icon" onClick={this.onRedo}/></button>
-                </>
-            )
+            </>)
         }
     }
 
     fillBoard = () => {
-        if(this.state.boardSpaces === null){
+        if(this.state.boardSpaces === null || this.state.settingGrid){
             var spaces = [];
             let key = this.state.spaceKey;
             //const token = null
@@ -274,23 +377,101 @@ PopupGfg() {
                 }
             };
             this.setState({spaceKey: key});
+            console.log(this.state.boardSpaces);
             this.setState({boardSpaces: spaces});
+            this.setState({settingGrid: false});
         }
     }
 
+    mountHandler = ({ onMount, onUnMount }) => {
+        useEffect(() => {
+            this.fillBoard();
+            onMount()
+            return onUnMount
+        },[this.state.gridCols, this.state.gridCols])
+        return null
+        }
+
+
     onSpaceClick(i, j, token){
-        const ind = (i*9) + j;
-        this.addUndo(this.state.boardSpaces);
-        this.setState((oldState) => {
-            let key = this.state.spaceKey;
-            const newSpaces = [...oldState.boardSpaces];
-            newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
-            token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
-            key++;
-            return{ boardSpaces: newSpaces,
-            spaceKey: key};
-        })
-    
+        if(this.state.activeTool == 1 || this.state.activeTool == 3){
+            const ind = (i*this.state.gridCols) + j;
+            this.addUndo(this.state.boardSpaces);
+            if(!this.state.paintImg /*for token  && !this.state.paintToken*/){
+                this.setState((oldState) => {
+                    let key = this.state.spaceKey;
+                    const newSpaces = [...oldState.boardSpaces];
+                    newSpaces[ind] = <Space key={key}  color={this.state.currColor} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+                    token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+                    key++;
+                    return{ boardSpaces: newSpaces,
+                    spaceKey: key};
+                })
+            }
+            else if(this.state.paintImg){
+                this.setState((oldState) => {
+                    let key = this.state.spaceKey;
+                    const newSpaces = [...oldState.boardSpaces];
+                    newSpaces[ind] = <Space key={key}  backImg={this.state.currImg} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+                    token = {token} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+                    key++;
+                    return{ boardSpaces: newSpaces,
+                    spaceKey: key};
+                })
+            }
+            /*for token 
+            else{
+                this.setState((oldState) => {
+                    let key = this.state.spaceKey;
+                    const newSpaces = [...oldState.boardSpaces];
+                    newSpaces[ind] = <Space key={key} color={newSpaces[ind].props.color}  backImg={newSpaces[ind].props.backImg} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+                    token = {this.state.currToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+                    key++;
+                    return{ boardSpaces: newSpaces,
+                    spaceKey: key};
+                })
+            }*/
+        }
+        else if(this.state.activeTool == 2){
+            
+            if(this.state.bucketStart.length > 0){
+                this.addUndo(this.state.boardSpaces);
+                let startI = Math.min(i, this.state.bucketStart[0]);
+                let startJ = Math.min(j, this.state.bucketStart[1]);
+                let endI = Math.max(i, this.state.bucketStart[0]);
+                let endJ = Math.max(j, this.state.bucketStart[1]);
+                console.log(startI);
+                const newState = [...this.state.boardSpaces];
+                let key = this.state.spaceKey;
+                if(!this.state.paintImg){
+                    for(let is = startI; is <= endI; is++){
+                        for(let js = startJ; js <= endJ; js++){
+                            const ind = (is*this.state.gridCols) + js;
+                                newState[ind] = <Space key={key} color={this.state.currColor} space_i={is} space_j={js} spaceClick={this.onSpaceClick.bind(this)}
+                                spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
+                                tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+                                key++;
+                        }
+                    }
+                    this.setState({boardSpaces: newState, spaceKey: key, bucketStart: []});
+                }
+                else{
+                    for(let is = startI; is <= endI; is++){
+                        for(let js = startJ; js <= endJ; js++){
+                            const ind = (is*this.state.gridCols) + js;
+                                newState[ind] = <Space key={key} backImg={this.state.currImg} space_i={is} space_j={js} spaceClick={this.onSpaceClick.bind(this)}
+                                spaceDrop={this.handleTokenDrop.bind(this)} token={newState[ind].props.token} tokenDrag={this.dragStartHandler.bind(this)} 
+                                tokenDragEnd={this.dragEndHandler.bind(this)}/>;
+                                key++;
+                        }
+                    }
+                    this.setState({boardSpaces: newState, spaceKey: key, bucketStart: []});
+                }
+            }
+            else{
+                this.setState({bucketStart: [i, j]});
+            }
+        }
     }
 
     onHide = () =>{
@@ -307,19 +488,19 @@ PopupGfg() {
         }
     }
 
-    handleTokenDrop(i, j, token, color){
-        console.log("" + i +", " +j)
-        const ind = (i*9) + j;
+    handleTokenDrop(i, j, token, color, img){
+        const ind = (i*this.state.gridCols) + j;
         this.addUndo(this.state.boardSpaces);
         this.setState((oldState) => {
         let key = this.state.spaceKey;
         const newSpaces = [...oldState.boardSpaces];
-        newSpaces[ind] = <Space key={key}  color={color} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+        newSpaces[ind] = <Space key={key}  color={color} backImg={img} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
         token = {this.state.draggedToken} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
         key++;
         return{ boardSpaces: newSpaces,
         spaceKey: key};
         })
+        
         
     }
 
@@ -332,8 +513,98 @@ PopupGfg() {
         this.setState({draggedToken: null});
     }
 
+    boardDragEndHandler(i, j, color, img){
+        const ind = (i*this.state.gridCols) + j;
+        this.setState((oldState) => {
+            let key = this.state.spaceKey;
+            const newSpaces = [...oldState.boardSpaces];
+            newSpaces[ind] = <Space key={key}  color={color} backImg={img} space_i={i} space_j={j} spaceClick={this.onSpaceClick.bind(this)} spaceDrop={this.handleTokenDrop.bind(this)}
+            token = {null} tokenDrag={this.dragStartHandler.bind(this)} tokenDragEnd={this.boardDragEndHandler.bind(this)}/>;
+            key++;
+            return{ boardSpaces: newSpaces,
+            spaceKey: key, draggedToken: null};
+            })
+    }
+
+    gridRowHandler = (e) => {
+        this.setState({gridRows: e.target.value});
+        this.setState({settingGrid: true});
+        //console.log("grid rows",e.target.value);
+    }
+
+    gridColHandler = (e) => {
+        this.setState({gridCols: e.target.value});
+        this.setState({settingGrid: true});
+        //console.log("grid cows",e.target.value);
+    }
+
+    doTools = () => {
+        let grabStyle = {};
+        let brushStyle = {};
+        let bucketStyle = {};
+        let eraserStyle = {};
+        if(this.state.activeTool == 0){
+            grabStyle = {borderColor: "red"};
+        }
+        else if(this.state.activeTool == 1){
+            brushStyle = {borderColor: "red"};
+        }
+        else if(this.state.activeTool == 2){
+            bucketStyle = {borderColor: "red"};
+        }
+        else{
+            eraserStyle = {borderColor: "red"};
+        }
+        
+        return(
+            <>
+                <button className="editor-icon-button" value={0} onClick={this.onToolClick} style={grabStyle}><img className="editor-tool-icon" src={require("../../icons/hand-icon.png")} alt="grab icon"/></button>
+                <button className="editor-icon-button" value={1} onClick={this.onToolClick} style={brushStyle}><img className="editor-tool-icon" src={require("../../icons/paint icon.png")} alt="paint brush icon"/></button>
+                <button className="editor-icon-button" value={2} onClick={this.onToolClick} style={bucketStyle}><img className="editor-tool-icon" src={require("../../icons/fill-bucket-icon.png")} alt="bucket icon"/></button>
+                <button className="editor-icon-button" value={3} onClick={this.onToolClick} style={eraserStyle}><img className="editor-tool-icon" src={require("../../icons/eraser-icon.png")} alt="eraser icon"/></button>
+            </>);
+    }
+
+    doFrame = () =>{
+        let frameStyle = {gridTemplateColumns: "repeat("+this.state.gridCols+", 1fr)"};
+        return(
+            <>
+                <div style={frameStyle} className="editor-board-frame">
+                    {this.state.boardSpaces}
+                    <Observer gridRows={this.state.gridRows} gridCols={this.state.gridCols} fillBoard={this.fillBoard}> </Observer>
+                    {this.makeTabParent()}
+                    {this.makeHide()}
+                </div>
+            </>
+        )
+    }
+
+    toggleHelp = () =>{
+        const toggle = !this.state.showHelp
+        this.setState({showHelp: toggle});
+    }
+
+    toggleRules = () =>{
+        const toggle = !this.state.showRules
+        this.setState({showRules: toggle});
+    }
+
+    closeRules = (rules) =>{
+        this.setState({rulesList: rules});
+        this.toggleRules()
+    }
+
+    doPopup = () =>{
+        if(this.state.showHelp){
+            return <HelpPopup handleClose={this.toggleHelp}></HelpPopup>
+        }
+        else if(this.state.showRules){
+            return <RulesPopup handleClose={this.closeRules} rules={this.state.rulesList}></RulesPopup>
+        }
+    }
+
     boardDragEndHandler(i, j, color){
-        const ind = (i*9) + j;
+        const ind = (i*this.state.gridRows) + j;
         this.setState((oldState) => {
         let key = this.state.spaceKey;
         const newSpaces = [...oldState.boardSpaces];
@@ -345,50 +616,51 @@ PopupGfg() {
         })
     }
 
+    gridRowHandler = (e) => {
+        this.setState({gridRows: e.target.value});
+        this.setState({settingGrid: true});
+        console.log("grid rows",e.target.value);
+    }
+
+    gridColHandler = (e) => {
+        this.setState({gridCols: e.target.value});
+        this.setState({settingGrid: true});
+        console.log("grid cows",e.target.value);
+    }
+
+    
+
     render(){
-        //TEST
-        //console.log("test")
-        //console.log(this.state);
-        this.fillBoard()
         return (
         <>
         <div className="editor-container">
+            {this.doPopup()}
             <div className="editor-tool-bar">
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/save-icon.png")} alt="save icon"/></button>
                 <button className="editor-icon-button" onClick={this.onLoadButton}><img className="editor-tool-icon" src={require("../../icons/load-icon.png")} alt="load icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/hand-icon.png")} alt="grab icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/paint icon.png")} alt="paint brush icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/fill-bucket-icon.png")} alt="bucket icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/eraser-icon.png")} alt="eraser icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/type-icon.png")} alt="T icon"/></button>
-                <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/ruler-icon.png")} alt="ruler icon"/></button>
+                {this.doTools()}
+                <button className="editor-help-button" onClick={this.toggleHelp}><img className="editor-tool-icon" src={require("../../icons/help-icon.png")} alt="help icon"/></button>
             </div>
             <div className="editor-right-side">
                 <div className="editor-header-bar">
                     <span className="editor-title">Board Editor</span>
-                    <div className="editor-play-button">
+                    <button className="editor-play-button" onClick={this.onStartGame}>
                         <span className="editor-start-text">Start Game</span>
                         <img className="editor-play-icon" src={require("../../icons/play-icon-green.png")} alt="play button"/>
-                    </div>
+                    </button>
 
                     <span className="editor-grid-text">Grid Size:</span>
-                    <input className='editor-size-input'></input>
+                    
+                    <input className='editor-size-input' onChange={this.gridRowHandler} value={this.state.gridRows}></input>
                     <span className="editor-grid-text">X</span>
-                    <input className='editor-size-input'></input>
+                    <input className='editor-size-input' onChange={this.gridColHandler} value={this.state.gridCols}></input>
+                    
 
                     <span className="editor-code-text">Room Code:</span>
                     <span className="editor-code">1234</span>
                     <img className="editor-copy-code" src={require("../../icons/copy-icon.png")} alt="copy icon"/>
                 </div>
-                <div className="editor-board-frame">
-                    {this.state.boardSpaces}
-                    <div className="editor-tabs">
-                        {this.state.buttonList.map(item => (
-                            this.makeTab(item)
-                        ))}
-                        {this.makeHide()}
-                    </div>
-                </div>
+                {this.doFrame()}
                 <div className="editor-tab-content">
                             {this.fillTabs()}
                 </div>
