@@ -261,9 +261,8 @@ button{
     border-style: solid;
     border-color: black;
     background-color: white;
-    border-radius: 40px;
-    margin-left: 60px;
     font-size: 48px;
+    margin-left: 30px;
 }
 
 .editor-upload-icon{
@@ -298,7 +297,7 @@ button{
     background-color: white;
     border-radius: 40px;
     font-size: 48px;
-} */
+}
 
 .editor-token-upload{
     display: inline-flex;
