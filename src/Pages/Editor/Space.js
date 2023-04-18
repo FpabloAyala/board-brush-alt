@@ -62,7 +62,7 @@ class Space extends Component {
             return (
             <>
                 <div className="editor-board-space" id={spaceID} onClick={this.handleClick}
-                style={{backgroundColor: this.state.color}} onDrop={this.handleDrop}
+                style={{backgroundColor: this.state.color}} onDrop={this.handleDrop} draggable="false"
                 onDragEnter={(e) => this.handleDragEnter(e)} onDragOver={(e) => this.handleDragOver(e)}>
                     {this.doToken()}
                 </div>

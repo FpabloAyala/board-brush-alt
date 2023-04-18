@@ -104,9 +104,7 @@ PopupGfg() {
                 {
                     close => (
                         <div className='modal'>
-                            <div className='content'>
-                                Welcome to GFG!!!
-                            </div>
+                            
                             <div>
                                 <SketchPicker
                                     color={this.state.newColor}
@@ -568,7 +566,7 @@ PopupGfg() {
         let frameStyle = {gridTemplateColumns: "repeat("+this.state.gridCols+", 1fr)"};
         return(
             <>
-                <div style={frameStyle} className="editor-board-frame">
+                <div style={frameStyle} className="editor-board-frame" draggable="false">
                     {this.state.boardSpaces}
                     <Observer gridRows={this.state.gridRows} gridCols={this.state.gridCols} fillBoard={this.fillBoard}> </Observer>
                     {this.makeTabParent()}
@@ -605,7 +603,7 @@ PopupGfg() {
     render(){
         return (
         <>
-        <div className="editor-container">
+        <div className="editor-container" draggable="false">
             {this.doPopup()}
             <div className="editor-tool-bar">
                 <button className="editor-icon-button"><img className="editor-tool-icon" src={require("../../icons/save-icon.png")} alt="save icon"/></button>
