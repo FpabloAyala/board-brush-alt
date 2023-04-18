@@ -75,7 +75,7 @@ class Space extends Component {
                 <>
                     <div className="editor-board-space" id={spaceID} onClick={this.handleClick}
                      onDrop={this.handleDrop} onDragEnter={(e) => this.handleDragEnter(e)} 
-                     onDragOver={(e) => this.handleDragOver(e)}>
+                     onDragOver={(e) => this.handleDragOver(e)} draggable="false">
                         <img className="editor-board-img" src={this.state.spaceImg}></img>
                         {this.doToken()}
                     </div>
